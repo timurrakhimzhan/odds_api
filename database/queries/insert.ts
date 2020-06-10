@@ -4,7 +4,7 @@ export function insertSportsRowQ(sportName: string): string {
     return `INSERT INTO sports (name) VALUES ('${sportName}')`;
 }
 
-export function insertLeagueRowQ(leagueName: string, url: string, sport: string): string {
+export function insertLeagueRowQ(sport: string, leagueName: string, url: string): string {
     return `INSERT INTO leagues (name, url, sports_id) VALUES 
                                                         (
                                                         '${leagueName}',

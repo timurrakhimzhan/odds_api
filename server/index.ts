@@ -6,8 +6,6 @@ import {Client} from "pg";
 import setup from "../database/setup";
 import {createMessage} from "../services/createMessage";
 import setupRoute from "./routes/setup";
-import createSportRoute from "./routes/createSport";
-import createLeagueRoute from "./routes/createLeague";
 import createFindFLRoute from "./routes/findMatchFL";
 import updateAbbrevRoute from "./routes/updateAbbreviation";
 import updateDateRoute from "./routes/updateDate";
@@ -21,8 +19,6 @@ async function main(): Promise<void> {
     server.use(bodyParser.json());
 
     setupRoute(server, client);
-    createSportRoute(server, client);
-    createLeagueRoute(server, client);
     createFindFLRoute(server, client);
     updateAbbrevRoute(server, client);
     updateDateRoute(server, client);
