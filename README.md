@@ -7,3 +7,5 @@ Create .env file in the root of the project in which you need to assign all the 
   database=name of your db
   password=password to your db for the corresponding user
   port=port on which your db is running on your server
+Using command api files in ./database/commandAPI to create sport and league
+Then using ./crawler/index.js you can fulfill your database :)
