@@ -3,6 +3,7 @@ import {Client} from "pg";
 import {League} from "../typings";
 import {changeTimezone, pageLoaded} from "../services/fetchingService";
 import {crawlSeason} from "./crawlerSeason";
+import {selectOrInsertSeason} from "../database/queries/select";
 
 export async function crawler(browser: Browser, client: Client, league: League): Promise<void> {
     const page: Page = await browser.newPage();
@@ -24,10 +25,12 @@ export async function crawler(browser: Browser, client: Client, league: League):
 
         const season: string = await page.evaluate(() => {
             const container: HTMLElement = document.querySelector(".main-menu-gray .main-filter .active") as HTMLElement;
-            return container.innerText;
+            return container.innerText.split("/").join("-");
         });
         console.log(`We are currently on season ${season}`);
-        await crawlSeason(page, client, league, season);
+        const seasonInserted = await client.query(selectOrInsertSeason(season, league.sports_id, league.id));
+        const seasons_id: number = parseInt(seasonInserted.rows[0].id);
+        await crawlSeason(page, client, league, seasons_id);
     }
 
     await page.close();

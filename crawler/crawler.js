@@ -38,9 +38,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var fetchingService_1 = require("../services/fetchingService");
 var crawlerSeason_1 = require("./crawlerSeason");
+var select_1 = require("../database/queries/select");
 function crawler(browser, client, league) {
     return __awaiter(this, void 0, void 0, function () {
-        var page, url, seasons, seasonsNumber, i, season;
+        var page, url, seasons, seasonsNumber, i, season, seasonInserted, seasons_id;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, browser.newPage()];
@@ -63,7 +64,7 @@ function crawler(browser, client, league) {
                     i = 0;
                     _a.label = 5;
                 case 5:
-                    if (!(i < seasonsNumber)) return [3 /*break*/, 13];
+                    if (!(i < seasonsNumber)) return [3 /*break*/, 14];
                     return [4 /*yield*/, page.$$('.main-menu-gray .main-filter a')];
                 case 6:
                     seasons = _a.sent();
@@ -78,23 +79,27 @@ function crawler(browser, client, league) {
                     _a.sent();
                     return [4 /*yield*/, page.evaluate(function () {
                             var container = document.querySelector(".main-menu-gray .main-filter .active");
-                            return container.innerText;
+                            return container.innerText.split("/").join("-");
                         })];
                 case 10:
                     season = _a.sent();
                     console.log("We are currently on season " + season);
-                    return [4 /*yield*/, crawlerSeason_1.crawlSeason(page, client, league, season)];
+                    return [4 /*yield*/, client.query(select_1.selectOrInsertSeason(season, league.sports_id, league.id))];
                 case 11:
-                    _a.sent();
-                    _a.label = 12;
+                    seasonInserted = _a.sent();
+                    seasons_id = parseInt(seasonInserted.rows[0].id);
+                    return [4 /*yield*/, crawlerSeason_1.crawlSeason(page, client, league, seasons_id)];
                 case 12:
+                    _a.sent();
+                    _a.label = 13;
+                case 13:
                     i++;
                     return [3 /*break*/, 5];
-                case 13: return [4 /*yield*/, page.close()];
-                case 14:
+                case 14: return [4 /*yield*/, page.close()];
+                case 15:
                     _a.sent();
                     return [4 /*yield*/, client.end()];
-                case 15:
+                case 16:
                     _a.sent();
                     return [2 /*return*/];
             }

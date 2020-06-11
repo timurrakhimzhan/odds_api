@@ -1,5 +1,6 @@
 import {Pool, Client} from 'pg';
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
+import {createFunctionSelectOrInsertSeason} from "./queries/create";
 dotenv.config({path: `${__dirname}/../.env`});
 
 
@@ -13,7 +14,8 @@ export async function connectDB(): Promise<Client> {
     });
 
     try {
-        await client.connect()
+        await client.connect();
+        await client.query(createFunctionSelectOrInsertSeason);
     } catch(error) {
         throw new Error(`Could not connected to database, ${error}`);
     }

@@ -36,62 +36,83 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var queries_1 = require("./queries");
+var queries_1 = require("../queries");
+var create_1 = require("../queries/create");
+var connect_1 = require("../connect");
 function setup(client, log) {
     if (log === void 0) { log = true; }
     return __awaiter(this, void 0, void 0, function () {
-        var error_1, error_2, error_3, error_4;
+        var error_1, error_2, error_3, error_4, error_5;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    return [4 /*yield*/, client.query(queries_1.createSportsTableQ)];
+                    if (!!client) return [3 /*break*/, 2];
+                    return [4 /*yield*/, connect_1.connectDB()];
                 case 1:
-                    _a.sent();
-                    return [3 /*break*/, 3];
+                    client = _a.sent();
+                    _a.label = 2;
                 case 2:
+                    _a.trys.push([2, 4, , 5]);
+                    return [4 /*yield*/, client.query(queries_1.createSportsTableQ)];
+                case 3:
+                    _a.sent();
+                    return [3 /*break*/, 5];
+                case 4:
                     error_1 = _a.sent();
                     throw new Error("Error while creating 'sports' table: " + error_1);
-                case 3:
+                case 5:
                     if (log)
                         console.log("Table 'sports' is created");
-                    _a.label = 4;
-                case 4:
-                    _a.trys.push([4, 6, , 7]);
-                    return [4 /*yield*/, client.query(queries_1.createLeaguesTableQ)];
-                case 5:
-                    _a.sent();
-                    return [3 /*break*/, 7];
+                    _a.label = 6;
                 case 6:
+                    _a.trys.push([6, 8, , 9]);
+                    return [4 /*yield*/, client.query(queries_1.createLeaguesTableQ)];
+                case 7:
+                    _a.sent();
+                    return [3 /*break*/, 9];
+                case 8:
                     error_2 = _a.sent();
                     throw new Error("Error while creating 'leagues' table: " + error_2);
-                case 7:
+                case 9:
                     if (log)
                         console.log("Table 'leagues' is created");
-                    _a.label = 8;
-                case 8:
-                    _a.trys.push([8, 10, , 11]);
-                    return [4 /*yield*/, client.query(queries_1.createTeamsTableQ)];
-                case 9:
-                    _a.sent();
-                    return [3 /*break*/, 11];
+                    _a.label = 10;
                 case 10:
-                    error_3 = _a.sent();
-                    throw new Error("Error while creating 'teams' table: " + error_3);
+                    _a.trys.push([10, 12, , 13]);
+                    return [4 /*yield*/, client.query(create_1.createSeasonTableQ)];
                 case 11:
+                    _a.sent();
+                    return [3 /*break*/, 13];
+                case 12:
+                    error_3 = _a.sent();
+                    throw new Error("Error while creating 'season' table: " + error_3);
+                case 13:
+                    if (log)
+                        console.log("Table 'season' is created");
+                    _a.label = 14;
+                case 14:
+                    _a.trys.push([14, 16, , 17]);
+                    return [4 /*yield*/, client.query(queries_1.createTeamsTableQ)];
+                case 15:
+                    _a.sent();
+                    return [3 /*break*/, 17];
+                case 16:
+                    error_4 = _a.sent();
+                    throw new Error("Error while creating 'teams' table: " + error_4);
+                case 17:
                     if (log)
                         console.log("Table 'teams' is created");
-                    _a.label = 12;
-                case 12:
-                    _a.trys.push([12, 14, , 15]);
+                    _a.label = 18;
+                case 18:
+                    _a.trys.push([18, 20, , 21]);
                     return [4 /*yield*/, client.query(queries_1.createMatchesTableQ)];
-                case 13:
+                case 19:
                     _a.sent();
-                    return [3 /*break*/, 15];
-                case 14:
-                    error_4 = _a.sent();
-                    throw new Error("Error while creating 'matches' table: " + error_4);
-                case 15:
+                    return [3 /*break*/, 21];
+                case 20:
+                    error_5 = _a.sent();
+                    throw new Error("Error while creating 'matches' table: " + error_5);
+                case 21:
                     if (log) {
                         console.log("Table 'matches' is created");
                         console.log("Setup is finished");
@@ -102,3 +123,4 @@ function setup(client, log) {
     });
 }
 exports.default = setup;
+setup();

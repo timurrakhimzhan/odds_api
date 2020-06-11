@@ -35,52 +35,39 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var puppeteer_1 = __importDefault(require("puppeteer"));
-var connect_1 = require("../database/connect");
-var crawler_1 = require("./crawler");
-var queries_1 = require("../database/queries");
-function crawlLeague(name, client) {
+var queries_1 = require("../queries");
+var readline_1 = require("../../services/readline");
+var connect_1 = require("../connect");
+function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var browser, rows, _i, rows_1, row;
+        var client, sportName, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    if (!!client) return [3 /*break*/, 2];
-                    return [4 /*yield*/, connect_1.connectDB()];
+                case 0: return [4 /*yield*/, connect_1.connectDB()];
                 case 1:
                     client = _a.sent();
-                    _a.label = 2;
-                case 2: return [4 /*yield*/, puppeteer_1.default.launch({ headless: true })];
+                    return [4 /*yield*/, readline_1.questionPrompt("Sport name:")];
+                case 2:
+                    sportName = _a.sent();
+                    _a.label = 3;
                 case 3:
-                    browser = _a.sent();
-                    return [4 /*yield*/, client.query(queries_1.selectLeaguesQ(name))];
+                    _a.trys.push([3, 5, , 6]);
+                    return [4 /*yield*/, client.query(queries_1.insertSportsRowQ(sportName))];
                 case 4:
-                    rows = (_a.sent()).rows;
-                    _i = 0, rows_1 = rows;
-                    _a.label = 5;
+                    _a.sent();
+                    return [3 /*break*/, 6];
                 case 5:
-                    if (!(_i < rows_1.length)) return [3 /*break*/, 8];
-                    row = rows_1[_i];
-                    return [4 /*yield*/, crawler_1.crawler(browser, client, row)];
+                    error_1 = _a.sent();
+                    throw new Error(error_1);
                 case 6:
-                    _a.sent();
-                    console.log(row.name + " league is added");
-                    _a.label = 7;
+                    console.log("Sport with name: " + sportName + " has been added to database");
+                    return [4 /*yield*/, client.end()];
                 case 7:
-                    _i++;
-                    return [3 /*break*/, 5];
-                case 8: return [4 /*yield*/, browser.close()];
-                case 9:
                     _a.sent();
-                    console.log("Finished");
                     return [2 /*return*/];
             }
         });
     });
 }
-exports.crawlLeague = crawlLeague;
-crawlLeague("nba").then();
+main();

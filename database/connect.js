@@ -35,13 +35,18 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var pg_1 = require("pg");
-var dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config({ path: __dirname + "/../.env" });
+var dotenv = __importStar(require("dotenv"));
+var create_1 = require("./queries/create");
+dotenv.config({ path: __dirname + "/../.env" });
 function connectDB() {
     return __awaiter(this, void 0, void 0, function () {
         var client, error_1;
@@ -57,15 +62,18 @@ function connectDB() {
                     });
                     _a.label = 1;
                 case 1:
-                    _a.trys.push([1, 3, , 4]);
+                    _a.trys.push([1, 4, , 5]);
                     return [4 /*yield*/, client.connect()];
                 case 2:
                     _a.sent();
-                    return [3 /*break*/, 4];
+                    return [4 /*yield*/, client.query(create_1.createFunctionSelectOrInsertSeason)];
                 case 3:
+                    _a.sent();
+                    return [3 /*break*/, 5];
+                case 4:
                     error_1 = _a.sent();
                     throw new Error("Could not connected to database, " + error_1);
-                case 4: return [2 /*return*/, client];
+                case 5: return [2 /*return*/, client];
             }
         });
     });

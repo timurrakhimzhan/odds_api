@@ -46,7 +46,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var queries_1 = require("../database/queries");
 var fetchingService_1 = require("../services/fetchingService");
 var cheerio = __importStar(require("cheerio"));
-function crawlSeason(page, client, league, season) {
+function crawlSeason(page, client, league, seasons_id) {
     return __awaiter(this, void 0, void 0, function () {
         var url, response, lastMatch, finished, _loop_1, state_1;
         return __generator(this, function (_a) {
@@ -106,7 +106,7 @@ function crawlSeason(page, client, league, season) {
                                                 scoreCrawled_1: scoreCrawled_1,
                                                 scoreCrawled_2: scoreCrawled_2
                                             };
-                                            databaseRequests(client, matchCrawled, league, season).then(function (res) {
+                                            databaseRequests(client, matchCrawled, league, seasons_id).then(function (res) {
                                                 if (res) {
                                                     // console.log(res);
                                                 }
@@ -139,47 +139,20 @@ function crawlSeason(page, client, league, season) {
     });
 }
 exports.crawlSeason = crawlSeason;
-function databaseRequests(client, matchCrawled, league, season) {
+function databaseRequests(client, matchCrawled, league, seasons_id) {
     return __awaiter(this, void 0, void 0, function () {
-        var teamCrawled_1, teamCrawled_2, dateCrawled, coeffCrawled_1, coeffCrawled_2, scoreCrawled_1, scoreCrawled_2, id, sports_id, responseTeam_1, responseTeam_2, responseMatch, _a, teams_id_1, teams_id_2, matchDB, _b, coeff_1, coeff_2, score_1, score_2;
-        var _c;
-        return __generator(this, function (_d) {
-            switch (_d.label) {
+        var teamCrawled_1, teamCrawled_2, dateCrawled, coeffCrawled_1, coeffCrawled_2, scoreCrawled_1, scoreCrawled_2, id, sports_id, responseMatch, matchDB, _a, coeff_1, coeff_2, score_1, score_2;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
-                    console.log(matchCrawled.teamCrawled_1 + "-" + matchCrawled.teamCrawled_2 + " is being processed");
                     teamCrawled_1 = matchCrawled.teamCrawled_1, teamCrawled_2 = matchCrawled.teamCrawled_2, dateCrawled = matchCrawled.dateCrawled, coeffCrawled_1 = matchCrawled.coeffCrawled_1, coeffCrawled_2 = matchCrawled.coeffCrawled_2, scoreCrawled_1 = matchCrawled.scoreCrawled_1, scoreCrawled_2 = matchCrawled.scoreCrawled_2;
                     id = league.id, sports_id = league.sports_id;
-                    return [4 /*yield*/, client.query(queries_1.selectTeamQ(teamCrawled_1))];
+                    return [4 /*yield*/, client.query(queries_1.selectMatchQ(matchCrawled))];
                 case 1:
-                    responseTeam_1 = _d.sent();
-                    if (!(responseTeam_1.rowCount === 0)) return [3 /*break*/, 3];
-                    return [4 /*yield*/, client.query(queries_1.insertTeamRowQ(teamCrawled_1, sports_id, id))];
-                case 2:
-                    _d.sent();
-                    _d.label = 3;
-                case 3: return [4 /*yield*/, client.query(queries_1.selectTeamQ(teamCrawled_2))];
-                case 4:
-                    responseTeam_2 = _d.sent();
-                    if (!(responseTeam_2.rowCount === 0)) return [3 /*break*/, 6];
-                    return [4 /*yield*/, client.query(queries_1.insertTeamRowQ(teamCrawled_2, sports_id, id))];
-                case 5:
-                    _d.sent();
-                    _d.label = 6;
-                case 6: return [4 /*yield*/, client.query(queries_1.selectMatchQ(matchCrawled))];
-                case 7:
-                    responseMatch = _d.sent();
-                    if (!(responseMatch.rowCount === 0)) return [3 /*break*/, 10];
-                    return [4 /*yield*/, Promise.all([client.query(queries_1.selectTeamQ(teamCrawled_1)),
-                            client.query(queries_1.selectTeamQ(teamCrawled_2))])];
-                case 8:
-                    _c = _d.sent(), responseTeam_1 = _c[0], responseTeam_2 = _c[1];
-                    _a = [responseTeam_1.rows[0].id, responseTeam_2.rows[0].id], teams_id_1 = _a[0], teams_id_2 = _a[1];
+                    responseMatch = _b.sent();
+                    if (!(responseMatch.rowCount === 0)) return [3 /*break*/, 3];
                     matchDB = {
                         date: dateCrawled,
-                        team_1: teamCrawled_1,
-                        teams_id_1: teams_id_1,
-                        team_2: teamCrawled_2,
-                        teams_id_2: teams_id_2,
                         leagues_id: id,
                         sports_id: sports_id,
                         url: matchCrawled.urlCrawled,
@@ -187,14 +160,14 @@ function databaseRequests(client, matchCrawled, league, season) {
                         coeff_2: coeffCrawled_2,
                         score_1: scoreCrawled_1,
                         score_2: scoreCrawled_2,
-                        season: season
+                        seasons_id: seasons_id
                     };
-                    return [4 /*yield*/, client.query(queries_1.insertMatchRowQ(matchDB))];
-                case 9:
-                    _d.sent();
+                    return [4 /*yield*/, client.query(queries_1.insertMatchRowQ(teamCrawled_1, teamCrawled_2, matchDB))];
+                case 2:
+                    _b.sent();
                     return [2 /*return*/, teamCrawled_1 + "-" + teamCrawled_2 + " " + dateCrawled + " added"];
-                case 10:
-                    _b = responseMatch.rows[0], coeff_1 = _b.coeff_1, coeff_2 = _b.coeff_2, score_1 = _b.score_1, score_2 = _b.score_2;
+                case 3:
+                    _a = responseMatch.rows[0], coeff_1 = _a.coeff_1, coeff_2 = _a.coeff_2, score_1 = _a.score_1, score_2 = _a.score_2;
                     if (score_1 == scoreCrawled_1 && score_2 == scoreCrawled_1) {
                         return [2 /*return*/];
                     }
@@ -202,8 +175,8 @@ function databaseRequests(client, matchCrawled, league, season) {
                         return [2 /*return*/];
                     }
                     return [4 /*yield*/, client.query(queries_1.updateMatchQ(matchCrawled))];
-                case 11:
-                    _d.sent();
+                case 4:
+                    _b.sent();
                     return [2 /*return*/, teamCrawled_1 + "-" + teamCrawled_2 + " " + dateCrawled + " updated"];
             }
         });

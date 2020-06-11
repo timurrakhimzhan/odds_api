@@ -1,8 +1,13 @@
 import {Pool, Client} from 'pg';
-import {createSportsTableQ, createLeaguesTableQ, createMatchesTableQ, createTeamsTableQ} from "./queries";
+import {createSportsTableQ, createLeaguesTableQ, createMatchesTableQ, createTeamsTableQ} from "../queries";
+import {createSeasonTableQ} from "../queries/create";
+import {connectDB} from "../connect";
 
 
-export default async function setup(client: Client, log: Boolean = true): Promise<void> {
+export default async function setup(client?: Client, log: Boolean = true): Promise<void> {
+    if(!client) {
+        client = await connectDB();
+    }
     try {
         await client.query(createSportsTableQ);
     } catch(error) {
@@ -20,6 +25,15 @@ export default async function setup(client: Client, log: Boolean = true): Promis
 
     if(log)
         console.log("Table 'leagues' is created");
+
+    try {
+        await client.query(createSeasonTableQ);
+    } catch(error) {
+        throw new Error(`Error while creating 'season' table: ${error}`);
+    }
+
+    if(log)
+        console.log("Table 'season' is created");
 
     try {
         await client.query(createTeamsTableQ);
@@ -41,3 +55,6 @@ export default async function setup(client: Client, log: Boolean = true): Promis
         console.log("Setup is finished");
     }
 }
+
+setup();
+

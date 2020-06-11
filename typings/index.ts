@@ -19,10 +19,10 @@ export interface MatchCrawled {
 export interface MatchDB {
     id?: number,
     date: string,
-    teams_id_1: number,
-    team_1: string,
-    teams_id_2: number,
-    team_2: string,
+    teams_id_1?: number,
+    team_1 ?: string,
+    team_2 ?: string,
+    teams_id_2?: number,
     url: string,
     coeff_1: Array<number> | number,
     coeff_2: Array<number> | number,
@@ -30,7 +30,7 @@ export interface MatchDB {
     score_2?: number,
     leagues_id: number,
     sports_id: number,
-    season: string
+    seasons_id: number
 }
 
 export interface MatchSearchFL {

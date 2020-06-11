@@ -12,7 +12,7 @@ import {
 import {changePage, getPage} from "../services/fetchingService";
 import * as cheerio from "cheerio";
 
-export async function crawlSeason(page: Page, client: Client, league: League, season: string) {
+export async function crawlSeason(page: Page, client: Client, league: League, seasons_id: number) {
     const {url} = league;
     const response = await client.query(selectMatchByStatusQ("finished"));
     const lastMatch: MatchDB = response.rows[0];
@@ -66,7 +66,7 @@ export async function crawlSeason(page: Page, client: Client, league: League, se
                     scoreCrawled_1,
                     scoreCrawled_2
                 };
-                databaseRequests(client, matchCrawled, league, season).then((res) => {
+                databaseRequests(client, matchCrawled, league, seasons_id).then((res) => {
                     if(res) {
                         // console.log(res);
                     }
@@ -81,34 +81,17 @@ export async function crawlSeason(page: Page, client: Client, league: League, se
     }
 }
 
-async function databaseRequests(client: Client, matchCrawled: MatchCrawled, league: League, season: string): Promise<string | void> {
-    console.log(`${matchCrawled.teamCrawled_1}-${matchCrawled.teamCrawled_2} is being processed`);
+async function databaseRequests(client: Client, matchCrawled: MatchCrawled, league: League, seasons_id: number): Promise<string | void> {
+    // console.log(`${matchCrawled.teamCrawled_1}-${matchCrawled.teamCrawled_2} is being processed`);
 
     let {teamCrawled_1, teamCrawled_2, dateCrawled, coeffCrawled_1, coeffCrawled_2, scoreCrawled_1, scoreCrawled_2} = matchCrawled;
     let {id, sports_id} = league;
 
-    let responseTeam_1 = await client.query(selectTeamQ(teamCrawled_1));
-    if(responseTeam_1.rowCount === 0) {
-        await client.query(insertTeamRowQ(teamCrawled_1, sports_id, id));
-    }
-
-    let responseTeam_2 = await client.query(selectTeamQ(teamCrawled_2));
-    if(responseTeam_2.rowCount === 0) {
-        await client.query(insertTeamRowQ(teamCrawled_2, sports_id, id));
-    }
-
     let responseMatch = await client.query(selectMatchQ(matchCrawled));
-    if(responseMatch.rowCount === 0) {
-        [responseTeam_1, responseTeam_2] = await Promise.all([client.query(selectTeamQ(teamCrawled_1)),
-                                                                    client.query(selectTeamQ(teamCrawled_2))]);
-        const [teams_id_1, teams_id_2] = [responseTeam_1.rows[0].id, responseTeam_2.rows[0].id];
 
+    if(responseMatch.rowCount === 0) {
         const matchDB: MatchDB = {
             date: dateCrawled,
-            team_1: teamCrawled_1,
-            teams_id_1,
-            team_2: teamCrawled_2,
-            teams_id_2,
             leagues_id: id,
             sports_id,
             url: matchCrawled.urlCrawled,
@@ -116,9 +99,9 @@ async function databaseRequests(client: Client, matchCrawled: MatchCrawled, leag
             coeff_2: coeffCrawled_2,
             score_1: scoreCrawled_1,
             score_2: scoreCrawled_2,
-            season
+            seasons_id
         };
-        await client.query(insertMatchRowQ(matchDB));
+        await client.query(insertMatchRowQ(teamCrawled_1, teamCrawled_2, matchDB));
         return `${teamCrawled_1}-${teamCrawled_2} ${dateCrawled} added`;
     } else {
         let {coeff_1, coeff_2, score_1, score_2} = responseMatch.rows[0];
