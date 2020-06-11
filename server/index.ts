@@ -3,9 +3,8 @@ import express from 'express';
 import * as bodyParser from 'body-parser';
 import {connectDB} from "../database/connect";
 import {Client} from "pg";
-import setup from "../database/setup";
+import setup from "../database/commandAPI/setup";
 import {createMessage} from "../services/createMessage";
-import setupRoute from "./routes/setup";
 import createFindFLRoute from "./routes/findMatchFL";
 import updateAbbrevRoute from "./routes/updateAbbreviation";
 import updateDateRoute from "./routes/updateDate";
@@ -17,8 +16,6 @@ async function main(): Promise<void> {
     console.log("Connected to database");
 
     server.use(bodyParser.json());
-
-    setupRoute(server, client);
     createFindFLRoute(server, client);
     updateAbbrevRoute(server, client);
     updateDateRoute(server, client);
