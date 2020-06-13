@@ -36,7 +36,8 @@ export async function crawlSeason(page: Page, client: Client, league: League, se
             }
             if($(el).hasClass('deactivate')) {
                 let time = $(el).find('.table-time').text();
-                let [teamCrawled_1, teamCrawled_2] = $(el).find('.table-participant').text().split(' - ');
+                let [teamCrawled_1, teamCrawled_2] = $(el).find('.table-participant').text().split(' - ')
+                                                            .map(team => team.trim());
                 let [scoreCrawled_1, scoreCrawled_2] = $(el).find('.table-score').text().split(':')
                                                             .map(score => parseInt(score));
                 let [coeffCrawled_1, coeffCrawled_2] = [$(el).find('.odds-nowrp').first().text(),

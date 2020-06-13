@@ -40,28 +40,32 @@ export function insertMatchRowQ(team_1: string, team_2: string, matchDB: MatchDB
     const insertQuery = `INSERT INTO matches (${keys.join(", ")}, status, teams_id_1, teams_id_2)
                                      VALUES (${insertValues}, '${status}', var_teams_id_1, var_teams_id_2)`;
 
-    return `DO $$
-            DECLARE var_teams_id_1 integer; var_teams_id_2 integer;
-            BEGIN
-                SELECT id FROM teams WHERE sports_id=${matchDB.sports_id}
-                                                  AND leagues_id=${matchDB.leagues_id}
-                                                  AND name='${team_1}' into var_teams_id_1;
-                SELECT id FROM teams WHERE sports_id=${matchDB.sports_id}
-                                                  AND leagues_id=${matchDB.leagues_id}
-                                                  AND name='${team_2}' into var_teams_id_2;
-                IF var_teams_id_1 IS NULL 
-                THEN
-                    INSERT INTO teams(sports_id, leagues_id, name) 
-                                VALUES(${matchDB.sports_id}, ${matchDB.leagues_id}, '${team_1}') 
-                                RETURNING id INTO var_teams_id_1;
-                END IF;
-                IF var_teams_id_2 IS NULL
-                THEN
-                    INSERT INTO teams(sports_id, leagues_id, name) 
-                                VALUES(${matchDB.sports_id}, ${matchDB.leagues_id}, '${team_2}')
-                                RETURNING id INTO var_teams_id_2;
-                END IF;
-                ${insertQuery};
-            END $$`;
+    return `BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+                DO $$
+                DECLARE var_teams_id_1 integer; var_teams_id_2 integer;
+                BEGIN
+                    SELECT id FROM teams WHERE sports_id=${matchDB.sports_id}
+                                                      AND leagues_id=${matchDB.leagues_id}
+                                                      AND UPPER(name)=UPPER('${team_1}') 
+                                                      INTO var_teams_id_1;
+                    SELECT id FROM teams WHERE sports_id=${matchDB.sports_id}
+                                                      AND leagues_id=${matchDB.leagues_id}
+                                                      AND UPPER(name)=UPPER('${team_2}') 
+                                                      INTO var_teams_id_2;
+                    IF var_teams_id_1 IS NULL 
+                    THEN
+                        INSERT INTO teams(sports_id, leagues_id, name) 
+                                    VALUES(${matchDB.sports_id}, ${matchDB.leagues_id}, '${team_1}') 
+                                    RETURNING id INTO var_teams_id_1;
+                    END IF;
+                    IF var_teams_id_2 IS NULL
+                    THEN
+                        INSERT INTO teams(sports_id, leagues_id, name) 
+                                    VALUES(${matchDB.sports_id}, ${matchDB.leagues_id}, '${team_2}')
+                                    RETURNING id INTO var_teams_id_2;
+                    END IF;
+                    ${insertQuery};
+                END $$;
+            END`;
 
 }

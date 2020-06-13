@@ -81,7 +81,8 @@ function crawlSeason(page, client, league, seasons_id) {
                                         }
                                         if ($(el).hasClass('deactivate')) {
                                             var time = $(el).find('.table-time').text();
-                                            var _a = $(el).find('.table-participant').text().split(' - '), teamCrawled_1 = _a[0], teamCrawled_2 = _a[1];
+                                            var _a = $(el).find('.table-participant').text().split(' - ')
+                                                .map(function (team) { return team.trim(); }), teamCrawled_1 = _a[0], teamCrawled_2 = _a[1];
                                             var _b = $(el).find('.table-score').text().split(':')
                                                 .map(function (score) { return parseInt(score); }), scoreCrawled_1 = _b[0], scoreCrawled_2 = _b[1];
                                             var _c = [$(el).find('.odds-nowrp').first().text(),
