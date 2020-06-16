@@ -43,20 +43,26 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var queries_1 = require("../database/queries");
 var fetchingService_1 = require("../services/fetchingService");
 var cheerio = __importStar(require("cheerio"));
+var select_1 = require("../database/preparedQueries/select");
+var databaseRequests_1 = require("./databaseRequests");
 function crawlSeason(page, client, league, seasons_id) {
     return __awaiter(this, void 0, void 0, function () {
-        var url, response, lastMatch, finished, _loop_1, state_1;
+        var url, response, lastMatch, state, finished, _loop_1, state_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     url = league.url;
-                    return [4 /*yield*/, client.query(queries_1.selectMatchByStatusQ("finished"))];
+                    return [4 /*yield*/, client.query(select_1.selectMatchByStatusPQ("finished"))];
                 case 1:
                     response = _a.sent();
                     lastMatch = response.rows[0];
+                    state = {
+                        finishedAll: false,
+                        finishedSeason: false,
+                        functionCreated: false,
+                    };
                     finished = false;
                     _loop_1 = function () {
                         var currentPage, content, $, date, changed;
@@ -87,14 +93,13 @@ function crawlSeason(page, client, league, seasons_id) {
                                                 .map(function (score) { return parseInt(score); }), scoreCrawled_1 = _b[0], scoreCrawled_2 = _b[1];
                                             var _c = [$(el).find('.odds-nowrp').first().text(),
                                                 $(el).find('.odds-nowrp').last().text()].map(function (coeff) { return parseFloat(coeff); }), coeffCrawled_1 = _c[0], coeffCrawled_2 = _c[1];
-                                            teamCrawled_1 = teamCrawled_1.split("").map(function (letter) { return letter == "'" ? "''" : letter; }).join("");
-                                            teamCrawled_2 = teamCrawled_2.split("").map(function (letter) { return letter == "'" ? "''" : letter; }).join("");
                                             var matchUrl = (new URL(url)).origin + $(el).find('.table-participant a').attr('href');
                                             var datetime = date + " " + time + "+00";
                                             if (isNaN(coeffCrawled_1) || isNaN(coeffCrawled_2))
                                                 return true;
-                                            if (lastMatch && teamCrawled_1 === lastMatch.team_1 && teamCrawled_2 === lastMatch.team_2 && datetime === lastMatch.date) {
-                                                finished = true;
+                                            if (lastMatch && teamCrawled_1 === lastMatch.team_1 && teamCrawled_2 === lastMatch.team_2 &&
+                                                new Date(datetime).toISOString() === new Date(lastMatch.date).toISOString()) {
+                                                state.finishedAll = true;
                                                 return false;
                                             }
                                             var matchCrawled = {
@@ -107,9 +112,8 @@ function crawlSeason(page, client, league, seasons_id) {
                                                 scoreCrawled_1: scoreCrawled_1,
                                                 scoreCrawled_2: scoreCrawled_2
                                             };
-                                            databaseRequests(client, matchCrawled, league, seasons_id).then(function (res) {
+                                            databaseRequests_1.databaseRequests(client, matchCrawled, league, seasons_id, state).then(function (res) {
                                                 if (res) {
-                                                    // console.log(res);
                                                 }
                                             });
                                         }
@@ -117,7 +121,10 @@ function crawlSeason(page, client, league, seasons_id) {
                                     return [4 /*yield*/, fetchingService_1.changePage(page, false)];
                                 case 3:
                                     changed = _a.sent();
-                                    if (finished || !changed) {
+                                    if (state.finishedAll) {
+                                        return [2 /*return*/, { value: void 0 }];
+                                    }
+                                    if (state.finishedSeason || !changed) {
                                         console.log(changed, finished);
                                         return [2 /*return*/, "break"];
                                     }
@@ -131,6 +138,8 @@ function crawlSeason(page, client, league, seasons_id) {
                     return [5 /*yield**/, _loop_1()];
                 case 3:
                     state_1 = _a.sent();
+                    if (typeof state_1 === "object")
+                        return [2 /*return*/, state_1.value];
                     if (state_1 === "break")
                         return [3 /*break*/, 4];
                     return [3 /*break*/, 2];
@@ -140,46 +149,3 @@ function crawlSeason(page, client, league, seasons_id) {
     });
 }
 exports.crawlSeason = crawlSeason;
-function databaseRequests(client, matchCrawled, league, seasons_id) {
-    return __awaiter(this, void 0, void 0, function () {
-        var teamCrawled_1, teamCrawled_2, dateCrawled, coeffCrawled_1, coeffCrawled_2, scoreCrawled_1, scoreCrawled_2, id, sports_id, responseMatch, matchDB, _a, coeff_1, coeff_2, score_1, score_2;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0:
-                    teamCrawled_1 = matchCrawled.teamCrawled_1, teamCrawled_2 = matchCrawled.teamCrawled_2, dateCrawled = matchCrawled.dateCrawled, coeffCrawled_1 = matchCrawled.coeffCrawled_1, coeffCrawled_2 = matchCrawled.coeffCrawled_2, scoreCrawled_1 = matchCrawled.scoreCrawled_1, scoreCrawled_2 = matchCrawled.scoreCrawled_2;
-                    id = league.id, sports_id = league.sports_id;
-                    return [4 /*yield*/, client.query(queries_1.selectMatchQ(matchCrawled))];
-                case 1:
-                    responseMatch = _b.sent();
-                    if (!(responseMatch.rowCount === 0)) return [3 /*break*/, 3];
-                    matchDB = {
-                        date: dateCrawled,
-                        leagues_id: id,
-                        sports_id: sports_id,
-                        url: matchCrawled.urlCrawled,
-                        coeff_1: coeffCrawled_1,
-                        coeff_2: coeffCrawled_2,
-                        score_1: scoreCrawled_1,
-                        score_2: scoreCrawled_2,
-                        seasons_id: seasons_id
-                    };
-                    return [4 /*yield*/, client.query(queries_1.insertMatchRowQ(teamCrawled_1, teamCrawled_2, matchDB))];
-                case 2:
-                    _b.sent();
-                    return [2 /*return*/, teamCrawled_1 + "-" + teamCrawled_2 + " " + dateCrawled + " added"];
-                case 3:
-                    _a = responseMatch.rows[0], coeff_1 = _a.coeff_1, coeff_2 = _a.coeff_2, score_1 = _a.score_1, score_2 = _a.score_2;
-                    if (score_1 == scoreCrawled_1 && score_2 == scoreCrawled_1) {
-                        return [2 /*return*/];
-                    }
-                    if (coeff_1[coeff_1.length - 1] === coeffCrawled_1 && coeff_2[coeff_2.length - 1] === coeffCrawled_2) {
-                        return [2 /*return*/];
-                    }
-                    return [4 /*yield*/, client.query(queries_1.updateMatchQ(matchCrawled))];
-                case 4:
-                    _b.sent();
-                    return [2 /*return*/, teamCrawled_1 + "-" + teamCrawled_2 + " " + dateCrawled + " updated"];
-            }
-        });
-    });
-}

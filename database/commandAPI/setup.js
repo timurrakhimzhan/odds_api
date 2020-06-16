@@ -36,8 +36,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var queries_1 = require("../queries");
 var create_1 = require("../queries/create");
+var create_2 = require("../queries/create");
 var connect_1 = require("../connect");
 function setup(client, log) {
     if (log === void 0) { log = true; }
@@ -53,7 +53,7 @@ function setup(client, log) {
                     _a.label = 2;
                 case 2:
                     _a.trys.push([2, 4, , 5]);
-                    return [4 /*yield*/, client.query(queries_1.createSportsTableQ)];
+                    return [4 /*yield*/, client.query(create_1.createSportsTableQ)];
                 case 3:
                     _a.sent();
                     return [3 /*break*/, 5];
@@ -66,7 +66,7 @@ function setup(client, log) {
                     _a.label = 6;
                 case 6:
                     _a.trys.push([6, 8, , 9]);
-                    return [4 /*yield*/, client.query(queries_1.createLeaguesTableQ)];
+                    return [4 /*yield*/, client.query(create_1.createLeaguesTableQ)];
                 case 7:
                     _a.sent();
                     return [3 /*break*/, 9];
@@ -79,7 +79,7 @@ function setup(client, log) {
                     _a.label = 10;
                 case 10:
                     _a.trys.push([10, 12, , 13]);
-                    return [4 /*yield*/, client.query(create_1.createSeasonTableQ)];
+                    return [4 /*yield*/, client.query(create_2.createSeasonTableQ)];
                 case 11:
                     _a.sent();
                     return [3 /*break*/, 13];
@@ -92,7 +92,7 @@ function setup(client, log) {
                     _a.label = 14;
                 case 14:
                     _a.trys.push([14, 16, , 17]);
-                    return [4 /*yield*/, client.query(queries_1.createTeamsTableQ)];
+                    return [4 /*yield*/, client.query(create_1.createTeamsTableQ)];
                 case 15:
                     _a.sent();
                     return [3 /*break*/, 17];
@@ -105,7 +105,7 @@ function setup(client, log) {
                     _a.label = 18;
                 case 18:
                     _a.trys.push([18, 20, , 21]);
-                    return [4 /*yield*/, client.query(queries_1.createMatchesTableQ)];
+                    return [4 /*yield*/, client.query(create_1.createMatchesTableQ)];
                 case 19:
                     _a.sent();
                     return [3 /*break*/, 21];

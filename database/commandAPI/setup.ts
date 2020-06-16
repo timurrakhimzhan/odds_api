@@ -1,5 +1,5 @@
 import {Pool, Client} from 'pg';
-import {createSportsTableQ, createLeaguesTableQ, createMatchesTableQ, createTeamsTableQ} from "../queries";
+import {createSportsTableQ, createLeaguesTableQ, createMatchesTableQ, createTeamsTableQ} from "../queries/create";
 import {createSeasonTableQ} from "../queries/create";
 import {connectDB} from "../connect";
 

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var createMessage_1 = require("../../services/createMessage");
-var update_1 = require("../../database/queries/update");
+var update_1 = require("../../database/preparedQueries/update");
 function updateAbbrevRoute(server, client) {
     server.post("/api/updateAbbrev/:sport/:league/", function (req, res) {
         var _a = req.params, sport = _a.sport, league = _a.league;
@@ -22,7 +22,7 @@ function updateAbbrevRoute(server, client) {
             res.status(400).send(createMessage_1.createMessage("Abbreviation of team should be provided"));
             return;
         }
-        client.query(update_1.updateAbbreviationQ(parseInt(id), abbreviation))
+        client.query(update_1.updateAbbreviationPQ(parseInt(id), abbreviation))
             .then(function (result) { return res.send(createMessage_1.createMessage("Abbreviation successfully updated", { abbreviation: abbreviation, id: id })); })
             .catch(function (err) { return res.status(400).send(createMessage_1.createMessage(err)); });
     });

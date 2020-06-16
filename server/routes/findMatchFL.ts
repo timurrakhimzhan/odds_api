@@ -2,7 +2,7 @@ import {Client} from "pg";
 import {Application, Request, Response} from "express";
 import {createMessage} from "../../services/createMessage";
 import {MatchSearchFL, Query} from "../../typings";
-import {selectMatchByFL} from "../../database/queries/select";
+import {selectMatchByFLPQ} from "../../database/preparedQueries/select";
 
 export default function createFindFLRoute(server: Application, client: Client) {
     server.get("/api/findMatchFL/:sport/:league/", (req: Request, res: Response) => {
@@ -37,7 +37,7 @@ export default function createFindFLRoute(server: Application, client: Client) {
 
         const datePST = new Date(date).toISOString();
         const match: MatchSearchFL = {team_1, team_2, date: datePST, score_1, score_2, sport, league};
-        client.query(selectMatchByFL(match))
+        client.query(selectMatchByFLPQ(match))
             .then(result => res.json({rowCount: result.rowCount, rows: result.rows}))
             .catch(err => res.status(400).send(createMessage(err)));
 

@@ -38,7 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var connect_1 = require("../connect");
 var readline_1 = require("../../services/readline");
-var queries_1 = require("../queries");
+var insert_1 = require("../preparedQueries/insert");
 function main() {
     return __awaiter(this, void 0, void 0, function () {
         var client, sportName, leagueName, url, error_1;
@@ -59,7 +59,7 @@ function main() {
                     _a.label = 5;
                 case 5:
                     _a.trys.push([5, 7, , 8]);
-                    return [4 /*yield*/, client.query(queries_1.insertLeagueRowQ(sportName, leagueName, url))];
+                    return [4 /*yield*/, client.query(insert_1.insertLeagueRowPQ(sportName, leagueName, url))];
                 case 6:
                     _a.sent();
                     return [3 /*break*/, 8];

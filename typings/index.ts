@@ -12,25 +12,18 @@ export interface MatchCrawled {
     urlCrawled: string,
     coeffCrawled_1: number,
     coeffCrawled_2: number,
-    scoreCrawled_1?: number,
-    scoreCrawled_2?: number,
+    scoreCrawled_1: number,
+    scoreCrawled_2: number,
 }
 
-export interface MatchDB {
-    id?: number,
+export interface MatchDBQuery {
     date: string,
-    teams_id_1?: number,
-    team_1 ?: string,
-    team_2 ?: string,
-    teams_id_2?: number,
     url: string,
     coeff_1: Array<number> | number,
     coeff_2: Array<number> | number,
-    score_1?: number,
-    score_2?: number,
-    leagues_id: number,
-    sports_id: number,
-    seasons_id: number
+    score_1: number,
+    score_2: number,
+    [key: string]: any
 }
 
 export interface MatchSearchFL {
@@ -44,4 +37,10 @@ export interface MatchSearchFL {
 }
 export interface Query {
     [key: string]: string
+}
+
+export interface State {
+    finishedSeason: boolean,
+    finishedAll: boolean,
+    functionCreated: boolean
 }

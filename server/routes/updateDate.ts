@@ -2,7 +2,7 @@ import {Application, Request, Response} from "express";
 import {Client} from "pg";
 import {Query} from "../../typings";
 import {createMessage} from "../../services/createMessage";
-import {updateMatchDateQ} from "../../database/queries/update";
+import {updateMatchDatePQ} from "../../database/preparedQueries/update";
 
 export default function updateDateRoute(server: Application, client: Client) {
     server.post("/api/updateDate/:sport/:league/", (req: Request, res: Response) => {
@@ -29,7 +29,7 @@ export default function updateDateRoute(server: Application, client: Client) {
             res.status(400).send(createMessage("Abbreviation of team should be provided"));
             return;
         }
-        client.query(updateMatchDateQ(parseInt(id), date))
+        client.query(updateMatchDatePQ(parseInt(id), date))
             .then(result => res.send(createMessage("Date is successfully updated", {id, date})))
             .catch(err => res.status(400).send(createMessage(err)));
     })

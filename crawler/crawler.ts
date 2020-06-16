@@ -34,5 +34,4 @@ export async function crawler(browser: Browser, client: Client, league: League):
     }
 
     await page.close();
-    await client.end();
 }

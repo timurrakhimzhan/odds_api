@@ -2,7 +2,7 @@ import puppeteer from "puppeteer";
 import {Client} from "pg";
 import {connectDB} from "../database/connect";
 import {crawler} from "./crawler";
-import {selectLeaguesQ} from "../database/queries";
+import {selectLeaguesPQ} from "../database/preparedQueries/select";
 
 
 export async function crawlLeague(name?: string, client?: Client) {
@@ -10,7 +10,7 @@ export async function crawlLeague(name?: string, client?: Client) {
         client = await connectDB();
     }
     const browser = await puppeteer.launch({headless: true});
-    const {rows} = await client.query(selectLeaguesQ(name));
+    const {rows} = await client.query(selectLeaguesPQ(name));
     for(let row of rows) {
         await crawler(browser, client, row);
         console.log(`${row.name} league is added`);
@@ -19,6 +19,6 @@ export async function crawlLeague(name?: string, client?: Client) {
     console.log("Finished");
 }
 
-crawlLeague("nba").then();
+crawlLeague("ncaa").then();
 
 

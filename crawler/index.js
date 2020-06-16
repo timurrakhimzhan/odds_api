@@ -42,7 +42,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var puppeteer_1 = __importDefault(require("puppeteer"));
 var connect_1 = require("../database/connect");
 var crawler_1 = require("./crawler");
-var queries_1 = require("../database/queries");
+var select_1 = require("../database/preparedQueries/select");
 function crawlLeague(name, client) {
     return __awaiter(this, void 0, void 0, function () {
         var browser, rows, _i, rows_1, row;
@@ -57,7 +57,7 @@ function crawlLeague(name, client) {
                 case 2: return [4 /*yield*/, puppeteer_1.default.launch({ headless: true })];
                 case 3:
                     browser = _a.sent();
-                    return [4 /*yield*/, client.query(queries_1.selectLeaguesQ(name))];
+                    return [4 /*yield*/, client.query(select_1.selectLeaguesPQ(name))];
                 case 4:
                     rows = (_a.sent()).rows;
                     _i = 0, rows_1 = rows;
@@ -83,4 +83,4 @@ function crawlLeague(name, client) {
     });
 }
 exports.crawlLeague = crawlLeague;
-crawlLeague("nba").then();
+crawlLeague("ncaa").then();

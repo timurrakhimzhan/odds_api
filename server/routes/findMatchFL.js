@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var createMessage_1 = require("../../services/createMessage");
-var select_1 = require("../../database/queries/select");
+var select_1 = require("../../database/preparedQueries/select");
 function createFindFLRoute(server, client) {
     server.get("/api/findMatchFL/:sport/:league/", function (req, res) {
         var _a = req.params, sport = _a.sport, league = _a.league;
@@ -29,7 +29,7 @@ function createFindFLRoute(server, client) {
         }
         var datePST = new Date(date).toISOString();
         var match = { team_1: team_1, team_2: team_2, date: datePST, score_1: score_1, score_2: score_2, sport: sport, league: league };
-        client.query(select_1.selectMatchByFL(match))
+        client.query(select_1.selectMatchByFLPQ(match))
             .then(function (result) { return res.json({ rowCount: result.rowCount, rows: result.rows }); })
             .catch(function (err) { return res.status(400).send(createMessage_1.createMessage(err)); });
     });

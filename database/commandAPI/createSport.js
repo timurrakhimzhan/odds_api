@@ -36,9 +36,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var queries_1 = require("../queries");
 var readline_1 = require("../../services/readline");
 var connect_1 = require("../connect");
+var insert_1 = require("../preparedQueries/insert");
 function main() {
     return __awaiter(this, void 0, void 0, function () {
         var client, sportName, error_1;
@@ -53,7 +53,7 @@ function main() {
                     _a.label = 3;
                 case 3:
                     _a.trys.push([3, 5, , 6]);
-                    return [4 /*yield*/, client.query(queries_1.insertSportsRowQ(sportName))];
+                    return [4 /*yield*/, client.query(insert_1.insertSportsRowPQ(sportName))];
                 case 4:
                     _a.sent();
                     return [3 /*break*/, 6];

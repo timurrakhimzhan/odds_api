@@ -98,9 +98,6 @@ function crawler(browser, client, league) {
                 case 14: return [4 /*yield*/, page.close()];
                 case 15:
                     _a.sent();
-                    return [4 /*yield*/, client.end()];
-                case 16:
-                    _a.sent();
                     return [2 /*return*/];
             }
         });

@@ -1,7 +1,7 @@
 import {Client} from "pg";
 import {connectDB} from "../connect";
 import {questionPrompt} from "../../services/readline";
-import {insertLeagueRowQ, insertSportsRowQ} from "../queries";
+import {insertLeagueRowPQ} from "../preparedQueries/insert";
 
 async function main() {
     const client: Client = await connectDB();
@@ -9,7 +9,7 @@ async function main() {
     const leagueName: string = await questionPrompt("League name:");
     const url: string = await questionPrompt("URL of archived odds:");
     try{
-        await client.query(insertLeagueRowQ(sportName, leagueName, url));
+        await client.query(insertLeagueRowPQ(sportName, leagueName, url));
     } catch(error) {
         throw new Error(error);
     }

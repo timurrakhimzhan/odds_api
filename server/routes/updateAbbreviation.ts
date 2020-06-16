@@ -2,7 +2,7 @@ import {Application, Request, Response} from "express";
 import {Client} from "pg";
 import {Query} from "../../typings";
 import {createMessage} from "../../services/createMessage";
-import {updateAbbreviationQ} from "../../database/queries/update";
+import {updateAbbreviationPQ} from "../../database/preparedQueries/update";
 
 export default function updateAbbrevRoute(server: Application, client: Client) {
     server.post("/api/updateAbbrev/:sport/:league/", (req: Request, res: Response) => {
@@ -29,7 +29,7 @@ export default function updateAbbrevRoute(server: Application, client: Client) {
             res.status(400).send(createMessage("Abbreviation of team should be provided"));
             return;
         }
-        client.query(updateAbbreviationQ(parseInt(id), abbreviation))
+        client.query(updateAbbreviationPQ(parseInt(id), abbreviation))
             .then(result => res.send(createMessage("Abbreviation successfully updated", {abbreviation, id})))
             .catch(err => res.status(400).send(createMessage(err)));
     })
