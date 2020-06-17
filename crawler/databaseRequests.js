@@ -59,11 +59,11 @@ function databaseRequests(client, matchCrawled, league, seasons_id, state) {
                         score_1: scoreCrawled_1,
                         score_2: scoreCrawled_2,
                     };
-                    if (!!state.functionCreated) return [3 /*break*/, 3];
+                    if (!!state.functionMatchCreated) return [3 /*break*/, 3];
                     return [4 /*yield*/, client.query(create_1.createFunctionInsertMatch(matchDB))];
                 case 2:
                     _b.sent();
-                    state.functionCreated = true;
+                    state.functionMatchCreated = true;
                     _b.label = 3;
                 case 3: return [4 /*yield*/, client.query(insert_1.insertMatchRowPQ(teamCrawled_1, teamCrawled_2, league, seasons_id, matchDB))];
                 case 4:

@@ -16,9 +16,14 @@ function insertSportsRowPQ(sportName) {
 }
 exports.insertSportsRowPQ = insertSportsRowPQ;
 function insertMatchRowPQ(team_1, team_2, league, season_id, matchDB) {
+    var score_1 = matchDB.score_1, score_2 = matchDB.score_2;
+    var status = "finished";
+    if (isNaN(score_1) || isNaN(score_2)) {
+        status = "progress";
+    }
     return {
         text: insert_1.insertMatchRowQ(league, season_id, matchDB),
-        values: [team_1, team_2]
+        values: [team_1, team_2, status]
     };
 }
 exports.insertMatchRowPQ = insertMatchRowPQ;

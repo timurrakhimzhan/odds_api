@@ -45,7 +45,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var pg_1 = require("pg");
 var dotenv = __importStar(require("dotenv"));
-var create_1 = require("./queries/create");
 dotenv.config({ path: __dirname + "/../.env" });
 function connectDB() {
     return __awaiter(this, void 0, void 0, function () {
@@ -62,18 +61,15 @@ function connectDB() {
                     });
                     _a.label = 1;
                 case 1:
-                    _a.trys.push([1, 4, , 5]);
+                    _a.trys.push([1, 3, , 4]);
                     return [4 /*yield*/, client.connect()];
                 case 2:
                     _a.sent();
-                    return [4 /*yield*/, client.query(create_1.createFunctionSelectOrInsertSeason)];
+                    return [3 /*break*/, 4];
                 case 3:
-                    _a.sent();
-                    return [3 /*break*/, 5];
-                case 4:
                     error_1 = _a.sent();
                     throw new Error("Could not connected to database, " + error_1);
-                case 5: return [2 /*return*/, client];
+                case 4: return [2 /*return*/, client];
             }
         });
     });

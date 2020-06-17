@@ -20,9 +20,9 @@ export async function databaseRequests(client: Client, matchCrawled: MatchCrawle
             score_1: scoreCrawled_1,
             score_2: scoreCrawled_2,
         };
-        if(!state.functionCreated) {
+        if(!state.functionMatchCreated) {
             await client.query(createFunctionInsertMatch(matchDB));
-            state.functionCreated = true;
+            state.functionMatchCreated = true;
         }
         await client.query(insertMatchRowPQ(teamCrawled_1, teamCrawled_2, league, seasons_id, matchDB));
         return `${teamCrawled_1}-${teamCrawled_2} ${dateCrawled} added`;

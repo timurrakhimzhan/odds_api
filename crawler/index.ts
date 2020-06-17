@@ -19,6 +19,6 @@ export async function crawlLeague(name?: string, client?: Client) {
     console.log("Finished");
 }
 
-crawlLeague("ncaa").then();
+crawlLeague("nba").then();
 
 

@@ -39,14 +39,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var fetchingService_1 = require("../services/fetchingService");
 var crawlerSeason_1 = require("./crawlerSeason");
 var select_1 = require("../database/queries/select");
+var create_1 = require("../database/queries/create");
 function crawler(browser, client, league) {
     return __awaiter(this, void 0, void 0, function () {
-        var page, url, seasons, seasonsNumber, i, season, seasonInserted, seasons_id;
+        var page, state, url, seasons, seasonsNumber, i, season, seasonInserted, seasons_id;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, browser.newPage()];
                 case 1:
                     page = _a.sent();
+                    state = {
+                        finishedAll: false,
+                        finishedSeason: false,
+                        functionMatchCreated: false
+                    };
                     url = league.url;
                     return [4 /*yield*/, page.goto(url)];
                 case 2:
@@ -57,46 +63,49 @@ function crawler(browser, client, league) {
                     console.log("----------------------------------");
                     console.log("Timezone changed");
                     console.log("----------------------------------");
-                    return [4 /*yield*/, page.$$('.main-menu-gray .main-filter a')];
+                    return [4 /*yield*/, client.query(create_1.createFunctionSelectOrInsertSeason)];
                 case 4:
+                    _a.sent();
+                    return [4 /*yield*/, page.$$('.main-menu-gray .main-filter a')];
+                case 5:
                     seasons = _a.sent();
                     seasonsNumber = seasons.length;
                     i = 0;
-                    _a.label = 5;
-                case 5:
-                    if (!(i < seasonsNumber)) return [3 /*break*/, 14];
-                    return [4 /*yield*/, page.$$('.main-menu-gray .main-filter a')];
+                    _a.label = 6;
                 case 6:
+                    if (!(i < seasonsNumber)) return [3 /*break*/, 15];
+                    return [4 /*yield*/, page.$$('.main-menu-gray .main-filter a')];
+                case 7:
                     seasons = _a.sent();
                     return [4 /*yield*/, seasons[i].click()];
-                case 7:
-                    _a.sent();
-                    return [4 /*yield*/, page.waitForNavigation()];
                 case 8:
                     _a.sent();
-                    return [4 /*yield*/, fetchingService_1.pageLoaded(page)];
+                    return [4 /*yield*/, page.waitForNavigation()];
                 case 9:
+                    _a.sent();
+                    return [4 /*yield*/, fetchingService_1.pageLoaded(page)];
+                case 10:
                     _a.sent();
                     return [4 /*yield*/, page.evaluate(function () {
                             var container = document.querySelector(".main-menu-gray .main-filter .active");
                             return container.innerText.split("/").join("-");
                         })];
-                case 10:
+                case 11:
                     season = _a.sent();
                     console.log("We are currently on season " + season);
                     return [4 /*yield*/, client.query(select_1.selectOrInsertSeason(season, league.sports_id, league.id))];
-                case 11:
+                case 12:
                     seasonInserted = _a.sent();
                     seasons_id = parseInt(seasonInserted.rows[0].id);
-                    return [4 /*yield*/, crawlerSeason_1.crawlSeason(page, client, league, seasons_id)];
-                case 12:
-                    _a.sent();
-                    _a.label = 13;
+                    return [4 /*yield*/, crawlerSeason_1.crawlSeason(page, client, league, seasons_id, state)];
                 case 13:
+                    _a.sent();
+                    _a.label = 14;
+                case 14:
                     i++;
-                    return [3 /*break*/, 5];
-                case 14: return [4 /*yield*/, page.close()];
-                case 15:
+                    return [3 /*break*/, 6];
+                case 15: return [4 /*yield*/, page.close()];
+                case 16:
                     _a.sent();
                     return [2 /*return*/];
             }

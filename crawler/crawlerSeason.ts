@@ -7,16 +7,12 @@ import {selectMatchByStatusPQ, selectMatchPQ} from "../database/preparedQueries/
 import {insertMatchRowPQ} from "../database/preparedQueries/insert";
 import {updateMatchPQ} from "../database/preparedQueries/update";
 import {databaseRequests} from "./databaseRequests";
+import {createFunctionSelectOrInsertSeason} from "../database/queries/create";
 
-export async function crawlSeason(page: Page, client: Client, league: League, seasons_id: number) {
+export async function crawlSeason(page: Page, client: Client, league: League, seasons_id: number, state: State) {
     const {url} = league;
     const response = await client.query(selectMatchByStatusPQ("finished"));
     const lastMatch: MatchDBQuery = response.rows[0];
-    const state: State = {
-        finishedAll: false,
-        finishedSeason: false,
-        functionCreated: false,
-    };
 
     let finished = false;
     while(true) {

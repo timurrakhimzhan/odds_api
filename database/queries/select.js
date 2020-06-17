@@ -10,7 +10,7 @@ function selectMatchQ(_a) {
 }
 exports.selectMatchQ = selectMatchQ;
 function selectMatchByStatusQ() {
-    return "SELECT matches.id, t1.name as team_1, t2.name as team_2, date\n                       FROM matches \n                       INNER JOIN teams as t1 ON matches.teams_id_1=t1.id\n                       INNER JOIN teams as t2 ON matches.teams_id_2=t2.id\n                       WHERE UPPER(status)=UPPER($1) \n                       ORDER BY date DESC LIMIT 1";
+    return "SELECT matches.id, t1.name as team_1, t2.name as team_2, date\n                       FROM matches \n                       INNER JOIN teams as t1 ON matches.teams_id_1=t1.id\n                       INNER JOIN teams as t2 ON matches.teams_id_2=t2.id\n                       WHERE status_id=(SELECT id FROM status WHERE UPPER(status.name)=UPPER($1)) \n                       ORDER BY date DESC LIMIT 1";
 }
 exports.selectMatchByStatusQ = selectMatchByStatusQ;
 function selectMatchByFLQ(match) {

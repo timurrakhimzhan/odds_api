@@ -83,4 +83,4 @@ function crawlLeague(name, client) {
     });
 }
 exports.crawlLeague = crawlLeague;
-crawlLeague("ncaa").then();
+crawlLeague("nba").then();

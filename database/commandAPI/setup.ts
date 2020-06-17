@@ -1,5 +1,11 @@
 import {Pool, Client} from 'pg';
-import {createSportsTableQ, createLeaguesTableQ, createMatchesTableQ, createTeamsTableQ} from "../queries/create";
+import {
+    createSportsTableQ,
+    createLeaguesTableQ,
+    createMatchesTableQ,
+    createTeamsTableQ,
+    createStatusTableQ
+} from "../queries/create";
 import {createSeasonTableQ} from "../queries/create";
 import {connectDB} from "../connect";
 
@@ -43,6 +49,15 @@ export default async function setup(client?: Client, log: Boolean = true): Promi
 
     if(log)
         console.log("Table 'teams' is created");
+
+    try {
+        await client.query(createStatusTableQ);
+    } catch(error) {
+        throw new Error(`Error while creating 'status' table: ${error}`);
+    }
+
+    if(log)
+        console.log("Table 'status' is created");
 
     try {
         await client.query(createMatchesTableQ);

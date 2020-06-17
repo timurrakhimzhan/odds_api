@@ -9,11 +9,6 @@ function insertLeagueRowQ() {
 }
 exports.insertLeagueRowQ = insertLeagueRowQ;
 function insertMatchRowQ(league, season_id, matchDB) {
-    var score_1 = matchDB.score_1, score_2 = matchDB.score_2;
-    var status = "finished";
-    if (isNaN(score_1) || isNaN(score_2)) {
-        status = "progress";
-    }
     var values_match = Object.keys(matchDB).map(function (key) {
         if (key.includes("date")) {
             return "var_" + key + ":='" + matchDB[key] + "'::timestamp with time zone";
@@ -38,6 +33,6 @@ function insertMatchRowQ(league, season_id, matchDB) {
             }
         }
     }).join(", ");
-    return "SELECT insert_match(" + league.sports_id + ", " + league.id + ", " + season_id + ", '" + status + "', $1, $2, " + values_match + ")";
+    return "SELECT insert_match(" + league.sports_id + ", " + league.id + ", " + season_id + ", $3, $1, $2, " + values_match + ")";
 }
 exports.insertMatchRowQ = insertMatchRowQ;

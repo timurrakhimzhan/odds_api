@@ -47,9 +47,9 @@ var fetchingService_1 = require("../services/fetchingService");
 var cheerio = __importStar(require("cheerio"));
 var select_1 = require("../database/preparedQueries/select");
 var databaseRequests_1 = require("./databaseRequests");
-function crawlSeason(page, client, league, seasons_id) {
+function crawlSeason(page, client, league, seasons_id, state) {
     return __awaiter(this, void 0, void 0, function () {
-        var url, response, lastMatch, state, finished, _loop_1, state_1;
+        var url, response, lastMatch, finished, _loop_1, state_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -58,11 +58,6 @@ function crawlSeason(page, client, league, seasons_id) {
                 case 1:
                     response = _a.sent();
                     lastMatch = response.rows[0];
-                    state = {
-                        finishedAll: false,
-                        finishedSeason: false,
-                        functionCreated: false,
-                    };
                     finished = false;
                     _loop_1 = function () {
                         var currentPage, content, $, date, changed;

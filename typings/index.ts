@@ -42,5 +42,5 @@ export interface Query {
 export interface State {
     finishedSeason: boolean,
     finishedAll: boolean,
-    functionCreated: boolean
+    functionMatchCreated: boolean,
 }

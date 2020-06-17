@@ -1,12 +1,18 @@
 import {Browser, ElementHandle, Page} from "puppeteer";
 import {Client} from "pg";
-import {League} from "../typings";
+import {League, State} from "../typings";
 import {changeTimezone, pageLoaded} from "../services/fetchingService";
 import {crawlSeason} from "./crawlerSeason";
 import {selectOrInsertSeason} from "../database/queries/select";
+import {createFunctionSelectOrInsertSeason} from "../database/queries/create";
 
 export async function crawler(browser: Browser, client: Client, league: League): Promise<void> {
     const page: Page = await browser.newPage();
+    const state: State = {
+        finishedAll: false,
+        finishedSeason: false,
+        functionMatchCreated: false
+    };
     const {url} = league;
     await page.goto(url);
 
@@ -14,6 +20,8 @@ export async function crawler(browser: Browser, client: Client, league: League):
     console.log("----------------------------------");
     console.log("Timezone changed");
     console.log("----------------------------------");
+
+    await client.query(createFunctionSelectOrInsertSeason);
 
     let seasons: Array<ElementHandle<Element>> = await page.$$('.main-menu-gray .main-filter a');
     let seasonsNumber: number = seasons.length;
@@ -30,7 +38,7 @@ export async function crawler(browser: Browser, client: Client, league: League):
         console.log(`We are currently on season ${season}`);
         const seasonInserted = await client.query(selectOrInsertSeason(season, league.sports_id, league.id));
         const seasons_id: number = parseInt(seasonInserted.rows[0].id);
-        await crawlSeason(page, client, league, seasons_id);
+        await crawlSeason(page, client, league, seasons_id, state);
     }
 
     await page.close();

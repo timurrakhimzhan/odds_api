@@ -42,7 +42,7 @@ var connect_1 = require("../connect");
 function setup(client, log) {
     if (log === void 0) { log = true; }
     return __awaiter(this, void 0, void 0, function () {
-        var error_1, error_2, error_3, error_4, error_5;
+        var error_1, error_2, error_3, error_4, error_5, error_6;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -105,14 +105,27 @@ function setup(client, log) {
                     _a.label = 18;
                 case 18:
                     _a.trys.push([18, 20, , 21]);
-                    return [4 /*yield*/, client.query(create_1.createMatchesTableQ)];
+                    return [4 /*yield*/, client.query(create_1.createStatusTableQ)];
                 case 19:
                     _a.sent();
                     return [3 /*break*/, 21];
                 case 20:
                     error_5 = _a.sent();
-                    throw new Error("Error while creating 'matches' table: " + error_5);
+                    throw new Error("Error while creating 'status' table: " + error_5);
                 case 21:
+                    if (log)
+                        console.log("Table 'status' is created");
+                    _a.label = 22;
+                case 22:
+                    _a.trys.push([22, 24, , 25]);
+                    return [4 /*yield*/, client.query(create_1.createMatchesTableQ)];
+                case 23:
+                    _a.sent();
+                    return [3 /*break*/, 25];
+                case 24:
+                    error_6 = _a.sent();
+                    throw new Error("Error while creating 'matches' table: " + error_6);
+                case 25:
                     if (log) {
                         console.log("Table 'matches' is created");
                         console.log("Setup is finished");

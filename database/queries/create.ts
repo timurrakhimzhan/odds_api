@@ -28,21 +28,26 @@ export const createSeasonTableQ: string= `CREATE TABLE IF NOT EXISTS seasons(
                                                             sports_id integer not null references sports(id),
                                                             leagues_id integer not null references leagues(id)
                                                             )`;
+export const createStatusTableQ: string = `CREATE TABLE IF NOT EXISTS status(
+                                                            id serial primary key,
+                                                            name varchar(200),
+                                                            other_name varchar(200)
+                                                            )`;
 
 export const createMatchesTableQ: string = `CREATE TABLE IF NOT EXISTS matches(
                                                                 id serial primary key,
+                                                                sports_id integer not null references sports(id),
+                                                                leagues_id integer not null references leagues(id),
+                                                                seasons_id integer not null references seasons(id),
+                                                                status_id integer not null references status(id),
                                                                 teams_id_1 integer not null references teams(id),
                                                                 teams_id_2 integer not null references teams(id),
                                                                 url varchar,
-                                                                status varchar,
                                                                 date timestamp with time zone,
                                                                 score_1 integer,
                                                                 score_2 integer,
                                                                 coeff_1 decimal ARRAY,
-                                                                coeff_2 decimal ARRAY,
-                                                                seasons_id integer not null references seasons(id),
-                                                                leagues_id integer not null references leagues(id),
-                                                                sports_id integer not null references sports(id)
+                                                                coeff_2 decimal ARRAY
                                                                 )`;
 export const createFunctionSelectOrInsertSeason: string = `CREATE OR REPLACE FUNCTION 
             select_or_insert_season(var_name varchar(100), var_sports_id integer, var_leagues_id integer)
@@ -90,7 +95,7 @@ export function createFunctionInsertMatch(matchDB: MatchDBQuery): string{
                 )
             RETURNS void AS
             $BODY$
-            DECLARE var_teams_id_1 integer; var_teams_id_2 integer;
+            DECLARE var_teams_id_1 integer; var_teams_id_2 integer; var_status_id integer;
             BEGIN
                 SELECT id FROM teams WHERE sports_id=var_sports_id
                                                   AND leagues_id=var_leagues_id
@@ -100,6 +105,7 @@ export function createFunctionInsertMatch(matchDB: MatchDBQuery): string{
                                                   AND leagues_id=var_leagues_id
                                                   AND UPPER(name)=UPPER(var_team_2) 
                                                   INTO var_teams_id_2;
+                SELECT id FROM status WHERE UPPER(name)=UPPER(var_status) INTO var_status_id;
                 IF var_teams_id_1 IS NULL 
                 THEN
                     INSERT INTO teams(sports_id, leagues_id, name) 
@@ -112,11 +118,15 @@ export function createFunctionInsertMatch(matchDB: MatchDBQuery): string{
                                 VALUES(var_sports_id, var_leagues_id, var_team_2)
                                 RETURNING id INTO var_teams_id_2;
                 END IF;
+                IF var_status_id IS NULL
+                THEN
+                    INSERT INTO status(name) VALUES(var_status) RETURNING id INTO var_status_id;
+                END IF;
                 INSERT INTO matches (
                                     sports_id,
                                     leagues_id,
                                     seasons_id,
-                                    status,
+                                    status_id,
                                     teams_id_1,
                                     teams_id_2,
                                     ${columns_match})
@@ -124,7 +134,7 @@ export function createFunctionInsertMatch(matchDB: MatchDBQuery): string{
                                     var_sports_id,
                                     var_leagues_id,
                                     var_seasons_id,
-                                    var_status,
+                                    var_status_id,
                                     var_teams_id_1,
                                     var_teams_id_2,
                                     ${values_match});

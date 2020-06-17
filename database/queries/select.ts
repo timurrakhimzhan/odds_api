@@ -21,7 +21,7 @@ export function selectMatchByStatusQ(): string {
                        FROM matches 
                        INNER JOIN teams as t1 ON matches.teams_id_1=t1.id
                        INNER JOIN teams as t2 ON matches.teams_id_2=t2.id
-                       WHERE UPPER(status)=UPPER($1) 
+                       WHERE status_id=(SELECT id FROM status WHERE UPPER(status.name)=UPPER($1)) 
                        ORDER BY date DESC LIMIT 1`;
 }
 

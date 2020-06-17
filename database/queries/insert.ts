@@ -14,11 +14,6 @@ export function insertLeagueRowQ(): string {
 }
 
 export function insertMatchRowQ(league: League, season_id: number, matchDB: MatchDBQuery): string{
-    const {score_1, score_2}: MatchDBQuery = matchDB;
-    let status: string = "finished";
-    if(isNaN(score_1) || isNaN(score_2)) {
-        status = "progress"
-    }
     const values_match = Object.keys(matchDB).map((key) => {
         if(key.includes("date")) {
             return `var_${key}:='${matchDB[key]}'::timestamp with time zone`
@@ -41,6 +36,6 @@ export function insertMatchRowQ(league: League, season_id: number, matchDB: Matc
             }
         }
     }).join(", ");
-    return `SELECT insert_match(${league.sports_id}, ${league.id}, ${season_id}, '${status}', $1, $2, ${values_match})`
+    return `SELECT insert_match(${league.sports_id}, ${league.id}, ${season_id}, $3, $1, $2, ${values_match})`
 
 }
