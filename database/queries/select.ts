@@ -1,9 +1,17 @@
-import {MatchCrawled, MatchSearchFL} from "../../typings";
+import {MatchCrawled} from "../../typings/crawler";
+import {MatchSearchFL} from "../../typings/server";
+
+
+export function selectAllLeaguesQ() {
+    return `SELECT id, sports_id, url, name FROM leagues`;
+}
 
 export function selectLeaguesQ() {
     return `SELECT id, sports_id, url, name FROM leagues where UPPER(name)=UPPER($1)`;
 
 }
+
+
 
 export function selectMatchQ({dateCrawled}: MatchCrawled) {
     return `SELECT t1.name AS team_1, t2.name AS team_2, score_1, score_2, coeff_1, coeff_2
@@ -12,16 +20,19 @@ export function selectMatchQ({dateCrawled}: MatchCrawled) {
                                     INNER JOIN teams AS t2 ON matches.teams_id_2=t2.id 
                                     WHERE UPPER(t1.name)=UPPER($1) 
                                     AND UPPER(t2.name)=UPPER($2)
-                                    AND date='${dateCrawled}'`;
+                                    AND ((date >= '${dateCrawled}'::timestamp with time zone AND date <= ('${dateCrawled}'::timestamp with time zone + '1 day'::interval))
+                                        OR 
+                                       (date <= '${dateCrawled}'::timestamp with time zone AND date >= ('${dateCrawled}'::timestamp with time zone - '1 day'::interval)))`;
 }
 
 
 export function selectMatchByStatusQ(): string {
-    return `SELECT matches.id, t1.name as team_1, t2.name as team_2, date
+    return `SELECT matches.id, t1.name as team_1, t2.name as team_2, date, score_1, score_2
                        FROM matches 
                        INNER JOIN teams as t1 ON matches.teams_id_1=t1.id
                        INNER JOIN teams as t2 ON matches.teams_id_2=t2.id
                        WHERE status_id=(SELECT id FROM status WHERE UPPER(status.name)=UPPER($1)) 
+                       AND matches.leagues_id=(SELECT id FROM leagues WHERE UPPER(leagues.name)=UPPER($2))
                        ORDER BY date DESC LIMIT 1`;
 }
 

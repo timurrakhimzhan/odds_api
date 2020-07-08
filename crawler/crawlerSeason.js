@@ -42,25 +42,30 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var fetchingService_1 = require("../services/fetchingService");
 var cheerio = __importStar(require("cheerio"));
 var select_1 = require("../database/preparedQueries/select");
 var databaseRequests_1 = require("./databaseRequests");
-function crawlSeason(page, client, league, seasons_id, state) {
+var store_1 = __importDefault(require("../state/store"));
+var moment_1 = __importDefault(require("moment"));
+var crawler_1 = require("../state/actions/crawler");
+function crawlSeason(page, client, league, seasons_id) {
     return __awaiter(this, void 0, void 0, function () {
-        var url, response, lastMatch, finished, _loop_1, state_1;
+        var url, response, lastMatch, _loop_1, state_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     url = league.url;
-                    return [4 /*yield*/, client.query(select_1.selectMatchByStatusPQ("finished"))];
+                    return [4 /*yield*/, client.query(select_1.selectMatchByStatusPQ(league.name, "finished"))];
                 case 1:
                     response = _a.sent();
                     lastMatch = response.rows[0];
-                    finished = false;
                     _loop_1 = function () {
-                        var currentPage, content, $, date, changed;
+                        var currentPage, content, $, date, changed, crawler;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0: return [4 /*yield*/, fetchingService_1.getPage(page)];
@@ -77,6 +82,7 @@ function crawlSeason(page, client, league, seasons_id, state) {
                                         return [2 /*return*/, "break"];
                                     }
                                     $('#tournamentTable tr').each(function (i, el) {
+                                        var crawler = store_1.default.getState().crawler;
                                         if ($(el).hasClass('center')) {
                                             date = $(el).find('.datet').text();
                                         }
@@ -89,12 +95,14 @@ function crawlSeason(page, client, league, seasons_id, state) {
                                             var _c = [$(el).find('.odds-nowrp').first().text(),
                                                 $(el).find('.odds-nowrp').last().text()].map(function (coeff) { return parseFloat(coeff); }), coeffCrawled_1 = _c[0], coeffCrawled_2 = _c[1];
                                             var matchUrl = (new URL(url)).origin + $(el).find('.table-participant a').attr('href');
-                                            var datetime = date + " " + time + "+00";
+                                            var datetime = date + " " + time + "Z";
                                             if (isNaN(coeffCrawled_1) || isNaN(coeffCrawled_2))
                                                 return true;
-                                            if (lastMatch && teamCrawled_1 === lastMatch.team_1 && teamCrawled_2 === lastMatch.team_2 &&
-                                                new Date(datetime).toISOString() === new Date(lastMatch.date).toISOString()) {
-                                                state.finishedAll = true;
+                                            if (lastMatch && crawler.daemon
+                                                && teamCrawled_1 === lastMatch.team_1 && teamCrawled_2 === lastMatch.team_2
+                                                && scoreCrawled_1 === lastMatch.score_1 && scoreCrawled_2 === lastMatch.score_2
+                                                && Math.abs(moment_1.default.duration(moment_1.default(datetime, "DD MMMM YYYY HH:mm ZZ").diff(lastMatch.date)).asDays()) < 1) {
+                                                store_1.default.dispatch(crawler_1.setFinishedCrawling(true));
                                                 return false;
                                             }
                                             var matchCrawled = {
@@ -107,7 +115,7 @@ function crawlSeason(page, client, league, seasons_id, state) {
                                                 scoreCrawled_1: scoreCrawled_1,
                                                 scoreCrawled_2: scoreCrawled_2
                                             };
-                                            databaseRequests_1.databaseRequests(client, matchCrawled, league, seasons_id, state).then(function (res) {
+                                            databaseRequests_1.databaseRequests(client, matchCrawled, league, seasons_id).then(function (res) {
                                                 if (res) {
                                                 }
                                             });
@@ -116,11 +124,11 @@ function crawlSeason(page, client, league, seasons_id, state) {
                                     return [4 /*yield*/, fetchingService_1.changePage(page, false)];
                                 case 3:
                                     changed = _a.sent();
-                                    if (state.finishedAll) {
+                                    crawler = store_1.default.getState().crawler;
+                                    if (crawler.finishedCrawling) {
                                         return [2 /*return*/, { value: void 0 }];
                                     }
-                                    if (state.finishedSeason || !changed) {
-                                        console.log(changed, finished);
+                                    if (!changed) {
                                         return [2 /*return*/, "break"];
                                     }
                                     return [2 /*return*/];

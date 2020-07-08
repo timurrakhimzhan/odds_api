@@ -1,6 +1,6 @@
-import {MatchCrawled} from "../../typings";
 import {QueryConfig} from "pg";
 import {updateAbbreviationQ, updateMatchDateQ, updateMatchQ} from "../queries/update";
+import {MatchCrawled} from "../../typings/crawler";
 
 export function updateMatchPQ(matchCrawled: MatchCrawled): QueryConfig {
     const {teamCrawled_1, teamCrawled_2, dateCrawled}: MatchCrawled = matchCrawled;

@@ -1,6 +1,6 @@
 import {Page} from "puppeteer";
 import {Client} from "pg";
-import {League, MatchCrawled, MatchDBQuery, State} from "../typings";
+import {League} from "../typings";
 import {changePage, getPage} from "../services/fetchingService";
 import * as cheerio from "cheerio";
 import {selectMatchByStatusPQ, selectMatchPQ} from "../database/preparedQueries/select";
@@ -8,13 +8,18 @@ import {insertMatchRowPQ} from "../database/preparedQueries/insert";
 import {updateMatchPQ} from "../database/preparedQueries/update";
 import {databaseRequests} from "./databaseRequests";
 import {createFunctionSelectOrInsertSeason} from "../database/queries/create";
+import {CrawlerState, State} from "../typings/states";
+import {MatchCrawled, MatchDBQuery} from "../typings/crawler";
+import store from "../state/store";
+import moment from "moment";
+import {setFinishedCrawling} from "../state/actions/crawler";
+import {StateFromReducersMapObject} from "redux";
 
-export async function crawlSeason(page: Page, client: Client, league: League, seasons_id: number, state: State) {
+export async function crawlSeason(page: Page, client: Client, league: League, seasons_id: number) {
     const {url} = league;
-    const response = await client.query(selectMatchByStatusPQ("finished"));
+    const response = await client.query(selectMatchByStatusPQ(league.name, "finished"));
     const lastMatch: MatchDBQuery = response.rows[0];
 
-    let finished = false;
     while(true) {
         const currentPage: string = await getPage(page);
         console.log("----------------------------------");
@@ -28,6 +33,7 @@ export async function crawlSeason(page: Page, client: Client, league: League, se
             break;
         }
         $('#tournamentTable tr').each((i: number, el: CheerioElement) => {
+            let {crawler}: State = store.getState();
             if($(el).hasClass('center')) {
                 date = $(el).find('.datet').text();
             }
@@ -41,13 +47,15 @@ export async function crawlSeason(page: Page, client: Client, league: League, se
                                                         $(el).find('.odds-nowrp').last().text()].map(coeff => parseFloat(coeff));
 
                 let matchUrl = (new URL(url)).origin + $(el).find('.table-participant a').attr('href');
-                const datetime = `${date} ${time}+00`;
+                const datetime = `${date} ${time}Z`;
 
                 if(isNaN(coeffCrawled_1) || isNaN(coeffCrawled_2))
                     return true;
-                if(lastMatch && teamCrawled_1 === lastMatch.team_1 && teamCrawled_2 === lastMatch.team_2 &&
-                    new Date(datetime).toISOString() === new Date(lastMatch.date).toISOString()) {
-                    state.finishedAll = true;
+                if(lastMatch && crawler.daemon
+                && teamCrawled_1 === lastMatch.team_1 && teamCrawled_2 === lastMatch.team_2
+                && scoreCrawled_1 === lastMatch.score_1 && scoreCrawled_2 === lastMatch.score_2
+                && Math.abs(moment.duration(moment(datetime, "DD MMMM YYYY HH:mm ZZ").diff(lastMatch.date)).asDays()) < 1) {
+                    store.dispatch(setFinishedCrawling(true));
                     return false;
                 }
 
@@ -61,18 +69,18 @@ export async function crawlSeason(page: Page, client: Client, league: League, se
                     scoreCrawled_1,
                     scoreCrawled_2
                 };
-                databaseRequests(client, matchCrawled, league, seasons_id, state).then((res) => {
+                databaseRequests(client, matchCrawled, league, seasons_id).then((res) => {
                     if(res) {
                     }
                 });
             }
         });
         const changed = await changePage(page, false);
-        if(state.finishedAll) {
+        let {crawler}: State = store.getState();
+        if(crawler.finishedCrawling) {
             return;
         }
-        if(state.finishedSeason || !changed) {
-            console.log(changed, finished);
+        if(!changed) {
             break;
         }
     }

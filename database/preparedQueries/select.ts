@@ -1,6 +1,19 @@
-import {MatchCrawled, MatchSearchFL} from "../../typings";
 import {QueryConfig} from "pg";
-import {selectLeaguesQ, selectMatchByFLQ, selectMatchByStatusQ, selectMatchQ} from "../queries/select";
+import {
+    selectAllLeaguesQ,
+    selectLeaguesQ,
+    selectMatchByFLQ,
+    selectMatchByStatusQ,
+    selectMatchQ
+} from "../queries/select";
+import {MatchCrawled} from "../../typings/crawler";
+import {MatchSearchFL} from "../../typings/server";
+
+export function selectAllleaguesPQ(): QueryConfig {
+    return {
+        text: selectAllLeaguesQ()
+    }
+}
 
 export function selectLeaguesPQ(name?: string): QueryConfig {
     return {
@@ -26,9 +39,9 @@ export function selectMatchPQ(matchCrawled: MatchCrawled): QueryConfig {
     }
 }
 
-export function selectMatchByStatusPQ(status: string = "finished"): QueryConfig{
+export function selectMatchByStatusPQ(league: string, status: string = "finished"): QueryConfig{
     return {
         text: selectMatchByStatusQ(),
-        values: [status]
+        values: [status, league]
     }
 }

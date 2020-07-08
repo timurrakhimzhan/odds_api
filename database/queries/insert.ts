@@ -1,4 +1,5 @@
-import {League, MatchDBQuery} from "../../typings";
+import {League} from "../../typings";
+import {MatchDBQuery} from "../../typings/crawler";
 
 export function insertSportsRowQ(): string {
     return `INSERT INTO sports (name) VALUES ($1)`;

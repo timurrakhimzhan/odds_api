@@ -1,8 +1,9 @@
 import {Client} from "pg";
 import {Application, Request, Response} from "express";
 import {createMessage} from "../../services/createMessage";
-import {MatchSearchFL, Query} from "../../typings";
+import {Query} from "../../typings";
 import {selectMatchByFLPQ} from "../../database/preparedQueries/select";
+import {MatchSearchFL} from "../../typings/server";
 
 export default function createFindFLRoute(server: Application, client: Client) {
     server.get("/api/findMatchFL/:sport/:league/", (req: Request, res: Response) => {

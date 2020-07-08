@@ -1,6 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var select_1 = require("../queries/select");
+function selectAllleaguesPQ() {
+    return {
+        text: select_1.selectAllLeaguesQ()
+    };
+}
+exports.selectAllleaguesPQ = selectAllleaguesPQ;
 function selectLeaguesPQ(name) {
     return {
         text: select_1.selectLeaguesQ(),
@@ -24,11 +30,11 @@ function selectMatchPQ(matchCrawled) {
     };
 }
 exports.selectMatchPQ = selectMatchPQ;
-function selectMatchByStatusPQ(status) {
+function selectMatchByStatusPQ(league, status) {
     if (status === void 0) { status = "finished"; }
     return {
         text: select_1.selectMatchByStatusQ(),
-        values: [status]
+        values: [status, league]
     };
 }
 exports.selectMatchByStatusPQ = selectMatchByStatusPQ;

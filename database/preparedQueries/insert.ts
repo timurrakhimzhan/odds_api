@@ -1,6 +1,7 @@
-import {League, MatchDBQuery} from "../../typings";
+import {League} from "../../typings";
 import {QueryConfig} from "pg";
 import {insertLeagueRowQ, insertMatchRowQ, insertSportsRowQ} from "../queries/insert";
+import {MatchDBQuery} from "../../typings/crawler";
 
 
 export function insertLeagueRowPQ(sport: string, leagueName: string, url: string): QueryConfig {

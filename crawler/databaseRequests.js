@@ -35,14 +35,19 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var select_1 = require("../database/preparedQueries/select");
 var insert_1 = require("../database/preparedQueries/insert");
 var update_1 = require("../database/preparedQueries/update");
 var create_1 = require("../database/queries/create");
-function databaseRequests(client, matchCrawled, league, seasons_id, state) {
+var store_1 = __importDefault(require("../state/store"));
+var crawler_1 = require("../state/actions/crawler");
+function databaseRequests(client, matchCrawled, league, seasons_id) {
     return __awaiter(this, void 0, void 0, function () {
-        var teamCrawled_1, teamCrawled_2, dateCrawled, coeffCrawled_1, coeffCrawled_2, scoreCrawled_1, scoreCrawled_2, responseMatch, matchDB, _a, coeff_1, coeff_2, score_1, score_2;
+        var teamCrawled_1, teamCrawled_2, dateCrawled, coeffCrawled_1, coeffCrawled_2, scoreCrawled_1, scoreCrawled_2, responseMatch, crawler, matchDB, _a, coeff_1, coeff_2, score_1, score_2;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -50,6 +55,7 @@ function databaseRequests(client, matchCrawled, league, seasons_id, state) {
                     return [4 /*yield*/, client.query(select_1.selectMatchPQ(matchCrawled))];
                 case 1:
                     responseMatch = _b.sent();
+                    crawler = store_1.default.getState().crawler;
                     if (!(responseMatch.rowCount === 0)) return [3 /*break*/, 5];
                     matchDB = {
                         date: dateCrawled,
@@ -59,11 +65,11 @@ function databaseRequests(client, matchCrawled, league, seasons_id, state) {
                         score_1: scoreCrawled_1,
                         score_2: scoreCrawled_2,
                     };
-                    if (!!state.functionMatchCreated) return [3 /*break*/, 3];
+                    if (!!crawler.functionMatchCreated) return [3 /*break*/, 3];
                     return [4 /*yield*/, client.query(create_1.createFunctionInsertMatch(matchDB))];
                 case 2:
                     _b.sent();
-                    state.functionMatchCreated = true;
+                    store_1.default.dispatch(crawler_1.setFunctionMatchCreated(true));
                     _b.label = 3;
                 case 3: return [4 /*yield*/, client.query(insert_1.insertMatchRowPQ(teamCrawled_1, teamCrawled_2, league, seasons_id, matchDB))];
                 case 4:

@@ -35,24 +35,23 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var fetchingService_1 = require("../services/fetchingService");
 var crawlerSeason_1 = require("./crawlerSeason");
 var select_1 = require("../database/queries/select");
 var create_1 = require("../database/queries/create");
+var store_1 = __importDefault(require("../state/store"));
 function crawler(browser, client, league) {
     return __awaiter(this, void 0, void 0, function () {
-        var page, state, url, seasons, seasonsNumber, i, season, seasonInserted, seasons_id;
+        var page, url, seasons, seasonsNumber, i, season, seasonInserted, seasons_id, crawler_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, browser.newPage()];
                 case 1:
                     page = _a.sent();
-                    state = {
-                        finishedAll: false,
-                        finishedSeason: false,
-                        functionMatchCreated: false
-                    };
                     url = league.url;
                     return [4 /*yield*/, page.goto(url)];
                 case 2:
@@ -97,9 +96,13 @@ function crawler(browser, client, league) {
                 case 12:
                     seasonInserted = _a.sent();
                     seasons_id = parseInt(seasonInserted.rows[0].id);
-                    return [4 /*yield*/, crawlerSeason_1.crawlSeason(page, client, league, seasons_id, state)];
+                    return [4 /*yield*/, crawlerSeason_1.crawlSeason(page, client, league, seasons_id)];
                 case 13:
                     _a.sent();
+                    crawler_1 = store_1.default.getState().crawler;
+                    if (crawler_1.finishedCrawling) {
+                        return [3 /*break*/, 15];
+                    }
                     _a.label = 14;
                 case 14:
                     i++;

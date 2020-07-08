@@ -1,16 +1,19 @@
 import {Client} from "pg";
-import {League, MatchCrawled, MatchDBQuery, State} from "../typings";
+import {League} from "../typings";
 import {selectMatchPQ} from "../database/preparedQueries/select";
 import {insertMatchRowPQ} from "../database/preparedQueries/insert";
 import {updateMatchPQ} from "../database/preparedQueries/update";
 import {createFunctionInsertMatch} from "../database/queries/create";
+import {CrawlerState} from "../typings/states";
+import {MatchCrawled, MatchDBQuery} from "../typings/crawler";
+import store from "../state/store";
+import {setFunctionMatchCreated} from "../state/actions/crawler";
 
-export async function databaseRequests(client: Client, matchCrawled: MatchCrawled, league: League, seasons_id: number, state: State): Promise<string | void> {
+export async function databaseRequests(client: Client, matchCrawled: MatchCrawled, league: League, seasons_id: number): Promise<string | void> {
 
     let {teamCrawled_1, teamCrawled_2, dateCrawled, coeffCrawled_1, coeffCrawled_2, scoreCrawled_1, scoreCrawled_2} = matchCrawled;
-
     let responseMatch = await client.query(selectMatchPQ(matchCrawled));
-
+    const {crawler} = store.getState();
     if(responseMatch.rowCount === 0) {
         const matchDB: MatchDBQuery = {
             date: dateCrawled,
@@ -20,9 +23,9 @@ export async function databaseRequests(client: Client, matchCrawled: MatchCrawle
             score_1: scoreCrawled_1,
             score_2: scoreCrawled_2,
         };
-        if(!state.functionMatchCreated) {
+        if(!crawler.functionMatchCreated) {
             await client.query(createFunctionInsertMatch(matchDB));
-            state.functionMatchCreated = true;
+            store.dispatch(setFunctionMatchCreated(true));
         }
         await client.query(insertMatchRowPQ(teamCrawled_1, teamCrawled_2, league, seasons_id, matchDB));
         return `${teamCrawled_1}-${teamCrawled_2} ${dateCrawled} added`;

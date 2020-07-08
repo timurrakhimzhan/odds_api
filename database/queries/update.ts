@@ -1,4 +1,4 @@
-import {MatchCrawled} from "../../typings";
+import {MatchCrawled} from "../../typings/crawler";
 
 export function updateMatchQ(matchCrawled: MatchCrawled) {
     let {scoreCrawled_1, scoreCrawled_2, coeffCrawled_1, coeffCrawled_2} = matchCrawled;

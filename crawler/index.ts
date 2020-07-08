@@ -11,14 +11,12 @@ export async function crawlLeague(name?: string, client?: Client) {
     }
     const browser = await puppeteer.launch({headless: true});
     const {rows} = await client.query(selectLeaguesPQ(name));
-    for(let row of rows) {
-        await crawler(browser, client, row);
-        console.log(`${row.name} league is added`);
-    }
+    await crawler(browser, client, rows[0]);
     await browser.close();
-    console.log("Finished");
 }
 
-crawlLeague("nba").then();
+if(require?.main === module) {
+    crawlLeague("nba").then();
+}
 
 

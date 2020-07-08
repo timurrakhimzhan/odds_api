@@ -1,4 +1,4 @@
-import {MatchDBQuery} from "../../typings";
+import {MatchDBQuery} from "../../typings/crawler";
 
 export const createSportsTableQ: string = `CREATE TABLE IF NOT EXISTS sports(
                                                                id serial primary key,

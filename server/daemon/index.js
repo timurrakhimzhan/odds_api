@@ -39,39 +39,57 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var puppeteer_1 = __importDefault(require("puppeteer"));
-var connect_1 = require("../database/connect");
-var crawler_1 = require("./crawler");
-var select_1 = require("../database/preparedQueries/select");
-function crawlLeague(name, client) {
+var connect_1 = require("../../database/connect");
+var select_1 = require("../../database/preparedQueries/select");
+var crawler_1 = require("../../crawler");
+var store_1 = __importDefault(require("../../state/store"));
+var crawler_2 = require("../../state/actions/crawler");
+function process() {
     return __awaiter(this, void 0, void 0, function () {
-        var browser, rows;
+        var client, rows, _i, rows_1, row;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, connect_1.connectDB()];
+                case 1:
+                    client = _a.sent();
+                    return [4 /*yield*/, client.query(select_1.selectAllleaguesPQ())];
+                case 2:
+                    rows = (_a.sent()).rows;
+                    _i = 0, rows_1 = rows;
+                    _a.label = 3;
+                case 3:
+                    if (!(_i < rows_1.length)) return [3 /*break*/, 6];
+                    row = rows_1[_i];
+                    console.log("Started League: " + row.name);
+                    return [4 /*yield*/, crawler_1.crawlLeague(row.name, client)];
+                case 4:
+                    _a.sent();
+                    console.log("Finished League: " + row.name);
+                    _a.label = 5;
+                case 5:
+                    _i++;
+                    return [3 /*break*/, 3];
+                case 6: return [2 /*return*/];
+            }
+        });
+    });
+}
+function daemon() {
+    return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    if (!!client) return [3 /*break*/, 2];
-                    return [4 /*yield*/, connect_1.connectDB()];
+                    store_1.default.dispatch(crawler_2.setDaemon(true));
+                    return [4 /*yield*/, process()];
                 case 1:
-                    client = _a.sent();
-                    _a.label = 2;
-                case 2: return [4 /*yield*/, puppeteer_1.default.launch({ headless: true })];
-                case 3:
-                    browser = _a.sent();
-                    return [4 /*yield*/, client.query(select_1.selectLeaguesPQ(name))];
-                case 4:
-                    rows = (_a.sent()).rows;
-                    return [4 /*yield*/, crawler_1.crawler(browser, client, rows[0])];
-                case 5:
                     _a.sent();
-                    return [4 /*yield*/, browser.close()];
-                case 6:
-                    _a.sent();
+                    console.log("Crawled. Waiting for an hour...");
+                    setTimeout(daemon, 1000 * 60 * 60);
                     return [2 /*return*/];
             }
         });
     });
 }
-exports.crawlLeague = crawlLeague;
 if ((require === null || require === void 0 ? void 0 : require.main) === module) {
-    crawlLeague("nba").then();
+    daemon();
 }
