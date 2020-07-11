@@ -14,11 +14,19 @@ function selectLeaguesPQ(name) {
     };
 }
 exports.selectLeaguesPQ = selectLeaguesPQ;
-function selectMatchByFLPQ(match) {
-    var sport = match.sport, league = match.league, team_1 = match.team_1, team_2 = match.team_2;
+function selectMatchByAbbrevPQ(match) {
+    var sport = match.sport, league = match.league, date = match.date, team_1_abbreviation = match.team_1_abbreviation, team_2_abbreviation = match.team_2_abbreviation, score_1 = match.score_1, score_2 = match.score_2;
     return {
-        text: select_1.selectMatchByFLQ(match),
-        values: [sport, league, team_1[0] + "%", team_2[0] + "%"]
+        text: select_1.selectMatchByAbbrevQ(),
+        values: [sport, league, date, team_1_abbreviation, team_2_abbreviation, score_1, score_2]
+    };
+}
+exports.selectMatchByAbbrevPQ = selectMatchByAbbrevPQ;
+function selectMatchByFLPQ(match) {
+    var sport = match.sport, league = match.league, date = match.date, team_1 = match.team_1, team_2 = match.team_2, score_1 = match.score_1, score_2 = match.score_2;
+    return {
+        text: select_1.selectMatchByFLQ(),
+        values: [sport, league, date, team_1[0] + "%", team_2[0] + "%", score_1, score_2]
     };
 }
 exports.selectMatchByFLPQ = selectMatchByFLPQ;

@@ -5,7 +5,7 @@ import {connectDB} from "../database/connect";
 import {Client} from "pg";
 import setup from "../database/commandAPI/setup";
 import {createMessage} from "../services/createMessage";
-import createFindFLRoute from "./routes/findMatchFL";
+import createFindMatchRoute from "./routes/findMatch";
 import updateAbbrevRoute from "./routes/updateAbbreviation";
 import updateDateRoute from "./routes/updateDate";
 
@@ -16,7 +16,7 @@ async function main(): Promise<void> {
     console.log("Connected to database");
 
     server.use(bodyParser.json());
-    createFindFLRoute(server, client);
+    createFindMatchRoute(server, client);
     updateAbbrevRoute(server, client);
     updateDateRoute(server, client);
 

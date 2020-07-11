@@ -1,13 +1,13 @@
 import {QueryConfig} from "pg";
 import {
     selectAllLeaguesQ,
-    selectLeaguesQ,
+    selectLeaguesQ, selectMatchByAbbrevQ,
     selectMatchByFLQ,
     selectMatchByStatusQ,
     selectMatchQ
 } from "../queries/select";
 import {MatchCrawled} from "../../typings/crawler";
-import {MatchSearchFL} from "../../typings/server";
+import {MatchSearch} from "../../typings/server";
 
 export function selectAllleaguesPQ(): QueryConfig {
     return {
@@ -22,12 +22,20 @@ export function selectLeaguesPQ(name?: string): QueryConfig {
     }
 }
 
-
-export function selectMatchByFLPQ(match: MatchSearchFL): QueryConfig {
-    const {sport, league, team_1, team_2}: MatchSearchFL = match;
+export function selectMatchByAbbrevPQ(match: MatchSearch): QueryConfig {
+    const {sport, league, date, team_1_abbreviation, team_2_abbreviation, score_1, score_2}: MatchSearch = match;
     return {
-        text: selectMatchByFLQ(match),
-        values: [sport, league, team_1[0] + "%", team_2[0] + "%"]
+        text: selectMatchByAbbrevQ(),
+        values: [sport, league, date, team_1_abbreviation, team_2_abbreviation, score_1, score_2]
+    }
+}
+
+
+export function selectMatchByFLPQ(match: MatchSearch): QueryConfig {
+    const {sport, league, date, team_1, team_2, score_1, score_2}: MatchSearch = match;
+    return {
+        text: selectMatchByFLQ(),
+        values: [sport, league, date, team_1[0] + "%", team_2[0] + "%", score_1, score_2]
     }
 }
 

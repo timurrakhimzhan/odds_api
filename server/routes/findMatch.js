@@ -5,7 +5,7 @@ var select_1 = require("../../database/preparedQueries/select");
 function createFindFLRoute(server, client) {
     server.get("/api/findMatchFL/:sport/:league/", function (req, res) {
         var _a = req.params, sport = _a.sport, league = _a.league;
-        var _b = req.query, team_1 = _b.team_1, team_2 = _b.team_2, date = _b.date, score_1 = _b.score_1, score_2 = _b.score_2;
+        var _b = req.query, team_1 = _b.team_1, team_2 = _b.team_2, date = _b.date, score_1 = _b.score_1, score_2 = _b.score_2, team_1_abbreviation = _b.team_1_abbreviation, team_2_abbreviation = _b.team_2_abbreviation;
         if (!sport) {
             res.status(400).send(createMessage_1.createMessage("Sport should be provided"));
             return;
@@ -15,8 +15,11 @@ function createFindFLRoute(server, client) {
             return;
         }
         if (!team_1 || !team_2) {
-            // console.log(team_1, team_2)
             res.status(400).send(createMessage_1.createMessage("Both teams should be provided"));
+            return;
+        }
+        if (!team_1_abbreviation || !team_2_abbreviation) {
+            res.status(400).send(createMessage_1.createMessage("Both abbreviations should be provided"));
             return;
         }
         if (!date) {
@@ -28,9 +31,21 @@ function createFindFLRoute(server, client) {
             return;
         }
         var datePST = new Date(date).toISOString();
-        var match = { team_1: team_1, team_2: team_2, date: datePST, score_1: score_1, score_2: score_2, sport: sport, league: league };
-        client.query(select_1.selectMatchByFLPQ(match))
-            .then(function (result) { return res.json({ rowCount: result.rowCount, rows: result.rows }); })
+        var match = { team_1: team_1, team_2: team_2, date: datePST, score_1: score_1, score_2: score_2, sport: sport, league: league, team_1_abbreviation: team_1_abbreviation, team_2_abbreviation: team_2_abbreviation };
+        client.query(select_1.selectMatchByAbbrevPQ(match))
+            .then(function (result) {
+            if (result.rowCount > 0) {
+                res.json({ rowCount: result.rowCount, rows: result.rows });
+            }
+            else {
+                return client.query(select_1.selectMatchByFLPQ(match));
+            }
+        })
+            .then(function (result) {
+            if (result) {
+                res.json({ rowCount: result.rowCount, rows: result.rows });
+            }
+        })
             .catch(function (err) { return res.status(400).send(createMessage_1.createMessage(err)); });
     });
 }
