@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var createMessage_1 = require("../../services/createMessage");
-var select_1 = require("../../database/preparedQueries/select");
-function createFindFLRoute(server, client) {
-    server.get("/api/findMatchFL/:sport/:league/", function (req, res) {
-        var _a = req.params, sport = _a.sport, league = _a.league;
-        var _b = req.query, team_1 = _b.team_1, team_2 = _b.team_2, date = _b.date, score_1 = _b.score_1, score_2 = _b.score_2, team_1_abbreviation = _b.team_1_abbreviation, team_2_abbreviation = _b.team_2_abbreviation;
+const createMessage_1 = require("../../services/createMessage");
+const select_1 = require("../../database/preparedQueries/select");
+function createFindMatchRoute(server, client) {
+    server.get("/api/findMatch/:sport/:league/", (req, res) => {
+        const { sport, league } = req.params;
+        const { team_1, team_2, date, score_1, score_2, team_1_abbreviation, team_2_abbreviation } = req.query;
         if (!sport) {
             res.status(400).send(createMessage_1.createMessage("Sport should be provided"));
             return;
@@ -30,10 +30,10 @@ function createFindFLRoute(server, client) {
             res.status(400).send(createMessage_1.createMessage("Both scores should be provided"));
             return;
         }
-        var datePST = new Date(date).toISOString();
-        var match = { team_1: team_1, team_2: team_2, date: datePST, score_1: score_1, score_2: score_2, sport: sport, league: league, team_1_abbreviation: team_1_abbreviation, team_2_abbreviation: team_2_abbreviation };
+        const datePST = new Date(date).toISOString();
+        const match = { team_1, team_2, date: datePST, score_1, score_2, sport, league, team_1_abbreviation, team_2_abbreviation };
         client.query(select_1.selectMatchByAbbrevPQ(match))
-            .then(function (result) {
+            .then((result) => {
             if (result.rowCount > 0) {
                 res.json({ rowCount: result.rowCount, rows: result.rows });
             }
@@ -41,12 +41,12 @@ function createFindFLRoute(server, client) {
                 return client.query(select_1.selectMatchByFLPQ(match));
             }
         })
-            .then(function (result) {
+            .then(result => {
             if (result) {
                 res.json({ rowCount: result.rowCount, rows: result.rows });
             }
         })
-            .catch(function (err) { return res.status(400).send(createMessage_1.createMessage(err)); });
+            .catch(err => res.status(400).send(createMessage_1.createMessage(err)));
     });
 }
-exports.default = createFindFLRoute;
+exports.default = createFindMatchRoute;

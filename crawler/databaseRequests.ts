@@ -1,43 +1,100 @@
-import {Client} from "pg";
-import {League} from "../typings";
-import {selectMatchPQ} from "../database/preparedQueries/select";
-import {insertMatchRowPQ} from "../database/preparedQueries/insert";
-import {updateMatchPQ} from "../database/preparedQueries/update";
-import {createFunctionInsertMatch} from "../database/queries/create";
-import {CrawlerState} from "../typings/states";
 import {MatchCrawled, MatchDBQuery} from "../typings/crawler";
-import store from "../state/store";
-import {setFunctionMatchCreated} from "../state/actions/crawler";
+import {Matches} from "../database/models/matches";
+import {Teams} from "../database/models/teams"
+import {Leagues} from "../database/models/leagues";
+import {Statuses} from "../database/models/statuses";
+import {Seasons} from "../database/models/seasons";
 
-export async function databaseRequests(client: Client, matchCrawled: MatchCrawled, league: League, seasons_id: number): Promise<string | void> {
+export async function databaseRequests(matchCrawled: MatchCrawled, league: Leagues, season: Seasons): Promise<string | void> {
 
-    let {teamCrawled_1, teamCrawled_2, dateCrawled, coeffCrawled_1, coeffCrawled_2, scoreCrawled_1, scoreCrawled_2} = matchCrawled;
-    let responseMatch = await client.query(selectMatchPQ(matchCrawled));
-    const {crawler} = store.getState();
-    if(responseMatch.rowCount === 0) {
-        const matchDB: MatchDBQuery = {
-            date: dateCrawled,
-            url: matchCrawled.urlCrawled,
-            coeff_1: coeffCrawled_1,
-            coeff_2: coeffCrawled_2,
-            score_1: scoreCrawled_1,
-            score_2: scoreCrawled_2,
-        };
-        if(!crawler.functionMatchCreated) {
-            await client.query(createFunctionInsertMatch(matchDB));
-            store.dispatch(setFunctionMatchCreated(true));
+    let {teamCrawled_1, teamCrawled_2, dateCrawled, coeffCrawled_1, coeffCrawled_2, scoreCrawled_1, scoreCrawled_2, urlCrawled, statusCrawled} = matchCrawled;
+
+    const [home]: [Teams, boolean] = await Teams.findOrCreate({
+        where: {
+            name: teamCrawled_1,
+            sports_id: league.get("sports_id") as number,
+            leagues_id: league.get("id") as number
         }
-        await client.query(insertMatchRowPQ(teamCrawled_1, teamCrawled_2, league, seasons_id, matchDB));
+    });
+
+    const [away]: [Teams, boolean] = await Teams.findOrCreate({
+        where: {
+            name: teamCrawled_2,
+            sports_id: league.get("sports_id") as number,
+            leagues_id: league.get("id") as number
+        }
+    });
+
+    const [status]: [Statuses, boolean] = await Statuses.findOrCreate({
+        where: {
+            name: statusCrawled
+        }
+    });
+
+    const match: Matches | null = await Matches.findOne({
+        where: {
+            home_id: home.get("id") as number,
+            away_id: away.get("id") as number,
+            start_date: dateCrawled.toDate(),
+        }
+    });
+
+
+    if(!match) {
+        await Matches.create({
+                home_id: home.get("id") as number,
+                leagues_id: league.get("id") as number,
+                sports_id: league.get("sports_id") as number,
+                status_id: status.get("id") as number,
+                seasons_id: season.get("id") as number,
+                home_score: scoreCrawled_1,
+                home_coeff: [coeffCrawled_1],
+                away_id: away.get("id") as number,
+                away_score: scoreCrawled_2,
+                away_coeff: [coeffCrawled_2],
+                start_date: dateCrawled.toDate(),
+                url: urlCrawled,
+                status: statusCrawled
+            });
         return `${teamCrawled_1}-${teamCrawled_2} ${dateCrawled} added`;
     } else {
-        let {coeff_1, coeff_2, score_1, score_2} = responseMatch.rows[0];
-        if(parseInt(score_1) == scoreCrawled_1 && parseInt(score_2) == scoreCrawled_1) {
-            return
+        const [home_coeffs, away_coeffs] = [match.get("home_coeff"), match.get("away_coeff")] as [Array<number>, Array<number>];
+        const [home_score, away_score] = [match.get("home_score"), match.get("away_score")] as [number, number];
+        const status: string = match.get("status") as string;
+        let [updatedHomeCoeff, updatedAwayCoeff] = [home_coeffs, away_coeffs];
+        let [updatedHomeScore, updatedAwayScore] = [home_score, away_score];
+        let updatedStatus = status;
+        let updated: boolean = false;
+        if(coeffCrawled_1 !== home_coeffs[home_coeffs.length - 1]) {
+            updatedHomeCoeff = [...home_coeffs, coeffCrawled_1];
+            updated = true;
         }
-        if(parseFloat(coeff_1[coeff_1.length - 1]) === coeffCrawled_1 && parseFloat(coeff_2[coeff_2.length - 1]) === coeffCrawled_2) {
-            return;
+        if(coeffCrawled_2 !== away_coeffs[away_coeffs.length - 1]) {
+            updatedAwayCoeff = [...away_coeffs, coeffCrawled_2];
+            updated = true;
         }
-        await client.query(updateMatchPQ(matchCrawled));
-        return `${teamCrawled_1}-${teamCrawled_2} ${dateCrawled} updated`;
+        if(scoreCrawled_1 !== home_score) {
+            updatedHomeScore = home_score;
+            updated = true;
+        }
+        if(scoreCrawled_2 !== away_score) {
+            updatedAwayScore = away_score;
+            updated = true;
+        }
+        if(statusCrawled !== status) {
+            updatedStatus = statusCrawled;
+        }
+
+        if(updated) {
+            await match.update({
+                home_score: updatedHomeScore,
+                home_coeff: updatedHomeCoeff,
+                away_score: updatedAwayScore,
+                away_coeff: updatedAwayCoeff,
+                status: updatedStatus
+            });
+            return `${teamCrawled_1}-${teamCrawled_2} ${dateCrawled} updated`;
+        }
+        return `${teamCrawled_1}-${teamCrawled_2} ${dateCrawled} already in db`;
     }
 }

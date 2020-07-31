@@ -9,18 +9,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const readline_1 = require("../../services/readline");
-const connectDB_1 = require("../connectDB");
-const sports_1 = require("../models/sports");
-function main() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const sequelize = yield connectDB_1.connectDB();
-        const sportName = yield readline_1.questionPrompt("Sport name:");
-        yield sports_1.Sports.create({ name: sportName });
-        console.log(`Sport with name: ${sportName} has been added to database`);
-        yield sequelize.close();
-    });
+exports.CustomModel = void 0;
+const sequelize_1 = require("sequelize");
+class CustomModel extends sequelize_1.Model {
+    static getId(attributes) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const res = yield this.findOne({ where: attributes });
+            if (!res) {
+                throw new Error(`Can not find id of the record in the table ${this.tableName}`);
+            }
+            return res.get("id");
+        });
+    }
 }
-if (require.main === module) {
-    main();
-}
+exports.CustomModel = CustomModel;

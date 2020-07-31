@@ -1,5 +1,7 @@
+import {Moment} from "moment";
+
 export interface MatchCrawled {
-    dateCrawled: string,
+    dateCrawled: Moment,
     teamCrawled_1: string,
     teamCrawled_2: string,
     urlCrawled: string,
@@ -7,6 +9,7 @@ export interface MatchCrawled {
     coeffCrawled_2: number,
     scoreCrawled_1: number,
     scoreCrawled_2: number,
+    statusCrawled: string
 }
 
 export interface MatchDBQuery {

@@ -3,22 +3,22 @@ import {Client} from "pg";
 import {League} from "../typings";
 import {changeTimezone, pageLoaded} from "../services/fetchingService";
 import {crawlSeason} from "./crawlerSeason";
-import {selectOrInsertSeason} from "../database/queries/select";
-import {createFunctionSelectOrInsertSeason} from "../database/queries/create";
-import {CrawlerState, State} from "../typings/states";
+import {State} from "../typings/states";
 import store from "../state/store";
+import {Leagues} from "../database/models/leagues";
+import {Seasons} from "../database/models/seasons";
 
-export async function crawler(browser: Browser, client: Client, league: League): Promise<void> {
+export async function crawler(browser: Browser, league: Leagues): Promise<void> {
     const page: Page = await browser.newPage();
-    const {url} = league;
-    await page.goto(url);
+    const url: string = league.get("url") as string;
+    const {crawler} = store.getState();
+    const crawlerUrl = crawler.daemon ? url : url + "/results/";
+    await page.goto(crawlerUrl);
 
     await changeTimezone(page);
     console.log("----------------------------------");
     console.log("Timezone changed");
     console.log("----------------------------------");
-
-    await client.query(createFunctionSelectOrInsertSeason);
 
     let seasons: Array<ElementHandle<Element>> = await page.$$('.main-menu-gray .main-filter a');
     let seasonsNumber: number = seasons.length;
@@ -28,14 +28,19 @@ export async function crawler(browser: Browser, client: Client, league: League):
         await page.waitForNavigation();
         await pageLoaded(page);
 
-        const season: string = await page.evaluate(() => {
+        const seasonName: string = await page.evaluate(() => {
             const container: HTMLElement = document.querySelector(".main-menu-gray .main-filter .active") as HTMLElement;
             return container.innerText.split("/").join("-");
         });
-        console.log(`We are currently on season ${season}`);
-        const seasonInserted = await client.query(selectOrInsertSeason(season, league.sports_id, league.id));
-        const seasons_id: number = parseInt(seasonInserted.rows[0].id);
-        await crawlSeason(page, client, league, seasons_id);
+        console.log(`We are currently on season ${seasonName}`);
+        const [season]: [Seasons, boolean] = await Seasons.findOrCreate({
+            where: {
+                name: seasonName,
+                sports_id: league.get("sports_id") as number,
+                leagues_id: league.get("id") as number
+            }
+        });
+        await crawlSeason(page, league, season);
         const {crawler}: State = store.getState();
         if(crawler.finishedCrawling) {
             break;

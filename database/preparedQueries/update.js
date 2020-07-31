@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var update_1 = require("../queries/update");
+exports.updateMatchDatePQ = exports.updateAbbreviationPQ = exports.updateMatchPQ = void 0;
+const update_1 = require("../queries/update");
 function updateMatchPQ(matchCrawled) {
-    var teamCrawled_1 = matchCrawled.teamCrawled_1, teamCrawled_2 = matchCrawled.teamCrawled_2, dateCrawled = matchCrawled.dateCrawled;
+    const { teamCrawled_1, teamCrawled_2, dateCrawled } = matchCrawled;
     return {
         text: update_1.updateMatchQ(matchCrawled),
         values: [teamCrawled_1, teamCrawled_2, dateCrawled]

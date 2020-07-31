@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var createMessage_1 = require("../../services/createMessage");
-var update_1 = require("../../database/preparedQueries/update");
+const createMessage_1 = require("../../services/createMessage");
+const update_1 = require("../../database/preparedQueries/update");
 function updateDateRoute(server, client) {
-    server.post("/api/updateDate/:sport/:league/", function (req, res) {
-        var _a = req.params, sport = _a.sport, league = _a.league;
-        var _b = req.body, id = _b.id, date = _b.date;
+    server.post("/api/updateDate/:sport/:league/", (req, res) => {
+        const { sport, league } = req.params;
+        const { id, date } = req.body;
         if (!sport) {
             res.status(400).send(createMessage_1.createMessage("Sport should be provided"));
             return;
@@ -23,8 +23,8 @@ function updateDateRoute(server, client) {
             return;
         }
         client.query(update_1.updateMatchDatePQ(parseInt(id), date))
-            .then(function (result) { return res.send(createMessage_1.createMessage("Date is successfully updated", { id: id, date: date })); })
-            .catch(function (err) { return res.status(400).send(createMessage_1.createMessage(err)); });
+            .then(result => res.send(createMessage_1.createMessage("Date is successfully updated", { id, date })))
+            .catch(err => res.status(400).send(createMessage_1.createMessage(err)));
     });
 }
 exports.default = updateDateRoute;

@@ -1,18 +1,19 @@
 import puppeteer from "puppeteer";
-import {Client} from "pg";
-import {connectDB} from "../database/connect";
+import {Sequelize} from "sequelize";
+import {connectDB} from "../database/connectDB";
 import {crawler} from "./crawler";
-import {selectLeaguesPQ} from "../database/preparedQueries/select";
+import {Leagues} from "../database/models/leagues";
 
 
-export async function crawlLeague(name?: string, client?: Client) {
-    if(!client) {
-        client = await connectDB();
-    }
+export async function crawlLeague(name?: string) {
+    let sequelize: Sequelize = await connectDB();
     const browser = await puppeteer.launch({headless: true});
-    const {rows} = await client.query(selectLeaguesPQ(name));
-    await crawler(browser, client, rows[0]);
+    const league: Leagues | null = await Leagues.findOne({where: Sequelize.where(Sequelize.fn('lower', Sequelize.col('name')), Sequelize.fn('lower', name))});
+    if(league) {
+        await crawler(browser, league);
+    }
     await browser.close();
+    await sequelize.close();
 }
 
 if(require?.main === module) {

@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var insert_1 = require("../queries/insert");
+exports.insertMatchRowPQ = exports.insertSportsRowPQ = exports.insertLeagueRowPQ = void 0;
+const insert_1 = require("../queries/insert");
 function insertLeagueRowPQ(sport, leagueName, url) {
     return {
         text: insert_1.insertLeagueRowQ(),
@@ -16,8 +17,8 @@ function insertSportsRowPQ(sportName) {
 }
 exports.insertSportsRowPQ = insertSportsRowPQ;
 function insertMatchRowPQ(team_1, team_2, league, season_id, matchDB) {
-    var score_1 = matchDB.score_1, score_2 = matchDB.score_2;
-    var status = "finished";
+    const { score_1, score_2 } = matchDB;
+    let status = "finished";
     if (isNaN(score_1) || isNaN(score_2)) {
         status = "progress";
     }
