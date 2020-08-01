@@ -1,6 +1,5 @@
 import {connectDB} from "../connectDB";
 import {questionPrompt} from "../../services/readline";
-import {insertLeagueRowPQ} from "../preparedQueries/insert";
 import {Sequelize} from "sequelize";
 import {Leagues} from "../models/leagues";
 import {Sports} from "../models/sports";

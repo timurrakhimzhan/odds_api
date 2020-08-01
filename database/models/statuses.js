@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.initStatus = exports.Statuses = void 0;
 const custom_1 = require("./custom");
 const sequelize_1 = require("sequelize");
 class Statuses extends custom_1.CustomModel {

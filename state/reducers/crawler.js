@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.crawlerStateReducer = void 0;
 const actionTypes_1 = require("../actions/actionTypes");
 const initialState = {
     finishedCrawling: false,

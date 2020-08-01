@@ -1,19 +1,20 @@
-import {Client} from "pg";
 import {connectDB} from "../../database/connectDB";
-import {selectAllleaguesPQ} from "../../database/preparedQueries/select";
-import {crawler} from "../../crawler/crawler";
-import {crawlLeague} from "../../crawler";
 import store from "../../state/store";
 import {setDaemon} from "../../state/actions/crawler";
+import {Sequelize} from "sequelize";
+import {Leagues} from "../../database/models/leagues";
+import {crawlLeague} from "../../crawler";
 
 async function process() {
-    const client: Client = {} as Client;
-    const {rows} = (await client.query(selectAllleaguesPQ()));
+    const sequelize: Sequelize = await connectDB();
+    const rows = await Leagues.findAll();
     for(let row of rows) {
-        console.log(`Started League: ${row.name}`);
-        // await crawlLeague(row.name, client);
-        console.log(`Finished League: ${row.name}`);
+        const name: string = row.get("name") as string;
+        console.log(`Started League: ${name}`);
+        await crawlLeague(name);
+        console.log(`Finished League: ${name}`);
     }
+    await sequelize.close();
 }
 
 async function daemon() {

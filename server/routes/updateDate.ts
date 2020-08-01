@@ -1,10 +1,8 @@
 import {Application, Request, Response} from "express";
-import {Client} from "pg";
-import {Query} from "../../typings";
 import {createMessage} from "../../services/createMessage";
-import {updateMatchDatePQ} from "../../database/preparedQueries/update";
+import {Matches} from "../../database/models/matches";
 
-export default function updateDateRoute(server: Application, client: Client) {
+export default function updateDateRoute(server: Application) {
     server.post("/api/updateDate/:sport/:league/", (req: Request, res: Response) => {
 
         const {sport, league} = req.params;
@@ -29,7 +27,7 @@ export default function updateDateRoute(server: Application, client: Client) {
             res.status(400).send(createMessage("Abbreviation of team should be provided"));
             return;
         }
-        client.query(updateMatchDatePQ(parseInt(id), date))
+        Matches.update({start_date: date}, {where: {id}})
             .then(result => res.send(createMessage("Date is successfully updated", {id, date})))
             .catch(err => res.status(400).send(createMessage(err)));
     })

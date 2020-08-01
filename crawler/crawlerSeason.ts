@@ -61,19 +61,16 @@ export async function  crawlSeason(page: Page, league: Leagues, season: Seasons)
 
                 let matchUrl = (new URL(url)).origin + $(el).find('.table-participant a').attr('href');
                 const datetime = moment(`${date} ${time}Z`, "DD MMMM YYYY HH:mm ZZ");
-                console.log(moment(`${date} ${time}Z`, "DD MMMM YYYY HH:mm ZZ"));
                 if(isNaN(coeffCrawled_1) || isNaN(coeffCrawled_2))
                     return true;
 
                 if(lastMatch && crawler.daemon
                 && teamCrawled_1 === lastMatch.get("team_1") && teamCrawled_2 === lastMatch.get("team_2")
                 && scoreCrawled_1 === lastMatch.get("score_1") && scoreCrawled_2 === lastMatch.get("score_2")
-                /*&& Math.abs(moment.duration(moment(datetime, "DD MMMM YYYY HH:mm ZZ").diff(lastMatch.get("start_date") as string)).asDays()) < 1*/) {
+                && Math.abs(moment.duration(moment(datetime, "DD MMMM YYYY HH:mm ZZ").diff(lastMatch.get("start_date") as string)).asDays()) < 1) {
                     store.dispatch(setFinishedCrawling(true));
                     return false;
                 }
-
-
 
                 let matchCrawled: MatchCrawled = {
                     dateCrawled: datetime,

@@ -12,7 +12,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.crawler = void 0;
 const fetchingService_1 = require("../services/fetchingService");
 const crawlerSeason_1 = require("./crawlerSeason");
 const store_1 = __importDefault(require("../state/store"));

@@ -2,14 +2,15 @@ import {Client} from "pg";
 import {Application, Request, Response} from "express";
 import {createMessage} from "../../services/createMessage";
 import {Query} from "../../typings";
-import {selectMatchByAbbrevPQ, selectMatchByFLPQ} from "../../database/preparedQueries/select";
-import {MatchSearch} from "../../typings/server";
+import Sequelize, {Op} from "sequelize";
+import {Matches} from "../../database/models/matches";
+import moment from "moment";
 
-export default function createFindMatchRoute(server: Application, client: Client) {
-    server.get("/api/findMatch/:sport/:league/", (req: Request, res: Response) => {
+export default function createFindMatchRoute(server: Application) {
+    server.get("/api/findMatch/:sport/:league/", async (req: Request, res: Response) => {
 
         const {sport, league} = req.params;
-        const {team_1, team_2, date, score_1, score_2, team_1_abbreviation, team_2_abbreviation} = req.query as Query;
+        const {team_1, team_2, date, team_1_abbreviation, team_2_abbreviation} = req.query as Query;
         if(!sport) {
             res.status(400).send(createMessage("Sport should be provided"));
             return;
@@ -35,27 +36,61 @@ export default function createFindMatchRoute(server: Application, client: Client
             return;
         }
 
-        if(!score_1 || !score_2) {
-            res.status(400).send(createMessage("Both scores should be provided"));
+        const matchesByAbbrev = await Matches.findAll({
+            where: {
+                [Op.and]: [
+                    {
+                        start_date: {
+                            [Op.between]: [moment(date).subtract(1, "days").toDate(), moment(date).add(1, "days").toDate()]
+                        }
+                    },
+                    {[Op.or]: [
+                            {[Op.and]: [
+                                    Sequelize.where(Sequelize.col("TeamsHome.abbreviation"), team_1_abbreviation),
+                                    Sequelize.where(Sequelize.col("TeamsAway.abbreviation"), team_2_abbreviation)]
+                            },
+                            {[Op.and]: [
+                                    Sequelize.where(Sequelize.col("TeamsHome.abbreviation"), team_2_abbreviation),
+                                    Sequelize.where(Sequelize.col("TeamsAway.abbreviation"), team_1_abbreviation)]
+                            },
+                        ]}
+                ]
+
+            },
+            include: [
+                Matches.TeamsHome, Matches.TeamsAway
+            ],
+            raw: true
+        });
+        if(matchesByAbbrev.length > 0) {
+            res.json({rowCount: matchesByAbbrev.length, rows: matchesByAbbrev});
             return;
         }
+        const matchesByFirstLetter = await Matches.findAll({
+            where: {
+                [Op.and]: [
+                    {
+                        start_date: {
+                            [Op.between]: [moment(date).subtract(1, "days").toDate(), moment(date).add(1, "days").toDate()]
+                        }
+                    },
+                    {[Op.or]: [
+                            {[Op.and]: [
+                                    Sequelize.where(Sequelize.col("TeamsHome.name"), {[Op.like]: `${team_1[0]}%`}),
+                                    Sequelize.where(Sequelize.col("TeamsAway.name"), {[Op.like]: `${team_2[0]}%`})]
+                            },
+                            {[Op.and]: [
+                                    Sequelize.where(Sequelize.col("TeamsHome.name"), {[Op.like]: `${team_2[0]}%`}),
+                                    Sequelize.where(Sequelize.col("TeamsAway.name"), {[Op.like]: `${team_1[0]}%`})]
+                            },
+                        ]}
+                ]
 
-        const datePST = new Date(date).toISOString();
-        const match: MatchSearch = {team_1, team_2, date: datePST, score_1, score_2, sport, league, team_1_abbreviation, team_2_abbreviation};
-        client.query(selectMatchByAbbrevPQ(match))
-            .then((result) => {
-                if(result.rowCount > 0) {
-                    res.json({rowCount: result.rowCount, rows: result.rows})
-                } else {
-                    return client.query(selectMatchByFLPQ(match));
-                }
-            })
-            .then(result => {
-                if(result) {
-                    res.json({rowCount: result.rowCount, rows: result.rows})
-                }
-            })
-            .catch(err => res.status(400).send(createMessage(err)));
-
+            },
+            include: [
+                Matches.TeamsHome, Matches.TeamsAway
+            ]
+        });
+        res.json({rowCount: matchesByAbbrev.length, rows: matchesByFirstLetter});
     })
 }

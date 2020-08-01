@@ -1,12 +1,13 @@
 import {Pool, Client} from 'pg';
 import * as dotenv from 'dotenv';
-import {Sequelize} from "sequelize";
+import {Op, Sequelize} from "sequelize";
 import {initSports} from "./models/sports";
 import {initLeagues} from "./models/leagues";
 import {initTeams} from "./models/teams";
 import {initSeasons} from "./models/seasons";
 import {initStatus} from "./models/statuses";
-import {initMatches} from "./models/matches";
+import {initMatches, Matches} from "./models/matches";
+import moment from "moment";
 dotenv.config({path: `${__dirname}/../.env`});
 
 

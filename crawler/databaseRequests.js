@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.databaseRequests = void 0;
 const matches_1 = require("../database/models/matches");
 const teams_1 = require("../database/models/teams");
 const statuses_1 = require("../database/models/statuses");

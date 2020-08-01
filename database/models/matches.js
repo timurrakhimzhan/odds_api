@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.initMatches = exports.Matches = void 0;
 const custom_1 = require("./custom");
 const sequelize_1 = require("sequelize");
 const statuses_1 = require("./statuses");

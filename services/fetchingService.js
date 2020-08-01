@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changeTimezone = exports.pageLoaded = exports.getPage = exports.changePage = void 0;
 function changePage(page, previous = true) {
     return __awaiter(this, void 0, void 0, function* () {
         const currentPage = yield getPage(page);

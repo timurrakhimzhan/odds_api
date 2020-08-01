@@ -1,10 +1,8 @@
 import {Application, Request, Response} from "express";
-import {Client} from "pg";
-import {Query} from "../../typings";
 import {createMessage} from "../../services/createMessage";
-import {updateAbbreviationPQ} from "../../database/preparedQueries/update";
+import {Matches} from "../../database/models/matches";
 
-export default function updateAbbrevRoute(server: Application, client: Client) {
+export default function updateAbbrevRoute(server: Application) {
     server.post("/api/updateAbbrev/:sport/:league/", (req: Request, res: Response) => {
 
         const {sport, league} = req.params;
@@ -29,8 +27,9 @@ export default function updateAbbrevRoute(server: Application, client: Client) {
             res.status(400).send(createMessage("Abbreviation of team should be provided"));
             return;
         }
-        client.query(updateAbbreviationPQ(parseInt(id), abbreviation))
-            .then(result => res.send(createMessage("Abbreviation successfully updated", {abbreviation, id})))
+
+        Matches.update({abbreviation}, {where: {id}})
+            .then(() => res.send(createMessage("Abbreviation successfully updated", {abbreviation, id})))
             .catch(err => res.status(400).send(createMessage(err)));
     })
 }

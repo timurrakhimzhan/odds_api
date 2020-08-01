@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CustomModel = void 0;
 const sequelize_1 = require("sequelize");
 class CustomModel extends sequelize_1.Model {
     static getId(attributes) {

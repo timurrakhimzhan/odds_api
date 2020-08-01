@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.initTeams = exports.Teams = void 0;
 const sequelize_1 = require("sequelize");
 const leagues_1 = require("./leagues");
 const sports_1 = require("./sports");
