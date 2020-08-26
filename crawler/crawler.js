@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.crawler = void 0;
 const fetchingService_1 = require("../services/fetchingService");
 const crawlerSeason_1 = require("./crawlerSeason");
 const store_1 = __importDefault(require("../state/store"));
@@ -21,12 +22,31 @@ function crawler(browser, league) {
         const page = yield browser.newPage();
         const url = league.get("url");
         const { crawler } = store_1.default.getState();
-        const crawlerUrl = crawler.daemon ? url : url + "/results/";
+        const crawlerUrl = crawler.daemon ? url : url + "results/";
+        console.log("Page opening with url:", crawlerUrl);
         yield page.goto(crawlerUrl);
+        console.log("Page opened with url:", crawlerUrl);
         yield fetchingService_1.changeTimezone(page);
         console.log("----------------------------------");
         console.log("Timezone changed");
         console.log("----------------------------------");
+        if (crawler.daemon) {
+            const season = yield seasons_1.Seasons.findOne({
+                where: {
+                    sports_id: league.get("sports_id"),
+                    leagues_id: league.get("id"),
+                    current: true
+                }
+            });
+            if (season) {
+                yield crawlerSeason_1.crawlSeason(page, league, season);
+            }
+            else {
+                console.log("No current season for this league");
+            }
+            yield page.close();
+            return;
+        }
         let seasons = yield page.$$('.main-menu-gray .main-filter a');
         let seasonsNumber = seasons.length;
         for (let i = 0; i < seasonsNumber; i++) {

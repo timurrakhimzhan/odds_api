@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.changeTimezone = exports.pageLoaded = exports.getPage = exports.changePage = void 0;
 function changePage(page, previous = true) {
     return __awaiter(this, void 0, void 0, function* () {
         const currentPage = yield getPage(page);
@@ -22,6 +23,9 @@ function changePage(page, previous = true) {
         while (true) {
             try {
                 let pages = yield page.$$('#pagination a');
+                if (!pages) {
+                    return false;
+                }
                 if (previous) {
                     yield pages[1].click();
                 }
@@ -52,6 +56,9 @@ function getLastPage(page) {
             if (lastPage) {
                 return lastPage;
             }
+            else {
+                return "1";
+            }
         }
     });
 }
@@ -73,7 +80,7 @@ function pageLoaded(page) {
                 const tableContainer = document.querySelector('#tournamentTable');
                 return tableContainer.style.display;
             });
-            if (display === "block") {
+            if (display !== "none") {
                 return;
             }
         }

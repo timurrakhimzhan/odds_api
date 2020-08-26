@@ -10,7 +10,11 @@ export class Seasons  extends Model {
 }
 export function initSeasons(sequelize: Sequelize) {
     Seasons.init({
-        name: DataTypes.STRING
+        name: DataTypes.STRING,
+        current: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
+        },
     }, {tableName: 'seasons', sequelize});
 
     Sports.Seasons = Sports.hasMany(Seasons, {foreignKey: {name: "sports_id", allowNull: false}, sourceKey: "id"});

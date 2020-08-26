@@ -10,7 +10,7 @@ export default function createFindMatchRoute(server: Application) {
     server.get("/api/findMatch/:sport/:league/", async (req: Request, res: Response) => {
 
         const {sport, league} = req.params;
-        const {team_1, team_2, date, team_1_abbreviation, team_2_abbreviation} = req.query as Query;
+        const {team_1, team_2, start_date, team_1_abbreviation, team_2_abbreviation, team_1_score, team_2_score} = req.query as Query;
         if(!sport) {
             res.status(400).send(createMessage("Sport should be provided"));
             return;
@@ -31,66 +31,70 @@ export default function createFindMatchRoute(server: Application) {
             return;
         }
 
-        if(!date) {
+        if(!start_date) {
             res.status(400).send(createMessage("Date should be provided"));
             return;
+        }
+        let abbrevConditions = [
+            Sequelize.where(Sequelize.col("TeamsHome.abbreviation"), team_1_abbreviation),
+            Sequelize.where(Sequelize.col("TeamsAway.abbreviation"), team_2_abbreviation)];
+        let abbrevConditionsReversed = [
+            Sequelize.where(Sequelize.col("TeamsHome.abbreviation"), team_2_abbreviation),
+            Sequelize.where(Sequelize.col("TeamsAway.abbreviation"), team_1_abbreviation)];
+
+        let flConditions = [
+            Sequelize.where(Sequelize.col("TeamsHome.name"), {[Op.like]: `${team_1.slice(0, 2)}%`}),
+            Sequelize.where(Sequelize.col("TeamsAway.name"), {[Op.like]: `${team_2.slice(0, 2)}%`})];
+        let flConditionReversed = [
+            Sequelize.where(Sequelize.col("TeamsHome.name"), {[Op.like]: `${team_2.slice(0, 2)}%`}),
+            Sequelize.where(Sequelize.col("TeamsAway.name"), {[Op.like]: `${team_1.slice(0, 2)}%`})];
+
+        if(team_1_score && team_2_score) {
+            abbrevConditions = [...abbrevConditions,
+                Sequelize.where(Sequelize.col("home_score"), team_1_score),
+                Sequelize.where(Sequelize.col("away_score"), team_2_score)
+            ];
+            abbrevConditionsReversed = [...abbrevConditionsReversed,
+                Sequelize.where(Sequelize.col("home_score"), team_2_score),
+                Sequelize.where(Sequelize.col("away_score"), team_1_score)
+            ];
+            flConditions = [...flConditions,
+                Sequelize.where(Sequelize.col("home_score"), team_1_score),
+                Sequelize.where(Sequelize.col("away_score"), team_2_score)
+            ];
+            flConditionReversed = [...flConditionReversed,
+                Sequelize.where(Sequelize.col("home_score"), team_2_score),
+                Sequelize.where(Sequelize.col("away_score"), team_1_score)
+            ];
         }
 
         const matchesByAbbrev = await Matches.findAll({
             where: {
-                [Op.and]: [
-                    {
-                        start_date: {
-                            [Op.between]: [moment(date).subtract(1, "days").toDate(), moment(date).add(1, "days").toDate()]
-                        }
-                    },
-                    {[Op.or]: [
-                            {[Op.and]: [
-                                    Sequelize.where(Sequelize.col("TeamsHome.abbreviation"), team_1_abbreviation),
-                                    Sequelize.where(Sequelize.col("TeamsAway.abbreviation"), team_2_abbreviation)]
-                            },
-                            {[Op.and]: [
-                                    Sequelize.where(Sequelize.col("TeamsHome.abbreviation"), team_2_abbreviation),
-                                    Sequelize.where(Sequelize.col("TeamsAway.abbreviation"), team_1_abbreviation)]
-                            },
-                        ]}
-                ]
-
-            },
-            include: [
-                Matches.TeamsHome, Matches.TeamsAway
-            ],
-            raw: true
-        });
-        if(matchesByAbbrev.length > 0) {
-            res.json({rowCount: matchesByAbbrev.length, rows: matchesByAbbrev});
-            return;
-        }
-        const matchesByFirstLetter = await Matches.findAll({
-            where: {
-                [Op.and]: [
-                    {
-                        start_date: {
-                            [Op.between]: [moment(date).subtract(1, "days").toDate(), moment(date).add(1, "days").toDate()]
-                        }
-                    },
-                    {[Op.or]: [
-                            {[Op.and]: [
-                                    Sequelize.where(Sequelize.col("TeamsHome.name"), {[Op.like]: `${team_1[0]}%`}),
-                                    Sequelize.where(Sequelize.col("TeamsAway.name"), {[Op.like]: `${team_2[0]}%`})]
-                            },
-                            {[Op.and]: [
-                                    Sequelize.where(Sequelize.col("TeamsHome.name"), {[Op.like]: `${team_2[0]}%`}),
-                                    Sequelize.where(Sequelize.col("TeamsAway.name"), {[Op.like]: `${team_1[0]}%`})]
-                            },
-                        ]}
-                ]
-
+                start_date: {
+                    [Op.between]: [moment(start_date).subtract(1, "days").toDate(), moment(start_date).add(1, "days").toDate()]
+                },
+                [Op.or]: [{[Op.and]: abbrevConditions}, {[Op.and]: abbrevConditionsReversed}]
             },
             include: [
                 Matches.TeamsHome, Matches.TeamsAway
             ]
         });
-        res.json({rowCount: matchesByAbbrev.length, rows: matchesByFirstLetter});
+        if(matchesByAbbrev.length > 0) {
+            res.json({rowCount: matchesByAbbrev.length, rows: matchesByAbbrev});
+            return;
+        }
+
+        const matchesByFirstLetter = await Matches.findAll({
+            where: {
+                start_date: {
+                    [Op.between]: [moment(start_date).subtract(1, "days").toDate(), moment(start_date).add(1, "days").toDate()]
+                },
+                [Op.or]: [{[Op.and]: flConditions}, {[Op.and]: flConditionReversed}]
+            },
+            include: [
+                Matches.TeamsHome, Matches.TeamsAway
+            ]
+        });
+        res.json({rowCount: matchesByFirstLetter.length, rows: matchesByFirstLetter});
     })
 }

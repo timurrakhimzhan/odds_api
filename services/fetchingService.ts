@@ -11,9 +11,13 @@ export async function changePage(page: Page, previous: Boolean = true): Promise<
         return false;
     }
 
+
     while(true) {
         try {
             let pages: Array<ElementHandle> = await page.$$('#pagination a');
+            if(!pages) {
+                return false;
+            }
             if(previous) {
                 await pages[1].click();
             } else {
@@ -39,6 +43,8 @@ async function getLastPage(page: Page): Promise<string> {
         });
         if(lastPage) {
             return lastPage;
+        } else {
+            return "1";
         }
     }
 }
@@ -57,7 +63,7 @@ export async function pageLoaded(page: Page): Promise<void> {
             const tableContainer = document.querySelector('#tournamentTable') as HTMLElement;
             return tableContainer.style.display;
         });
-        if(display === "block") {
+        if(display !== "none") {
             return;
         }
     }
@@ -79,4 +85,5 @@ export async function changeTimezone(page: Page): Promise<void> {
     await timeZone.click();
     await page.waitForNavigation();
     await pageLoaded(page);
+
 }

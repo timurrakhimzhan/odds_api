@@ -12,21 +12,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.crawlLeague = void 0;
 const puppeteer_1 = __importDefault(require("puppeteer"));
 const sequelize_1 = require("sequelize");
 const connectDB_1 = require("../database/connectDB");
 const crawler_1 = require("./crawler");
 const leagues_1 = require("../database/models/leagues");
+const store_1 = __importDefault(require("../state/store"));
 function crawlLeague(name) {
     return __awaiter(this, void 0, void 0, function* () {
-        let sequelize = yield connectDB_1.connectDB();
+        const { crawler: crawlerState } = store_1.default.getState();
+        let sequelize = crawlerState.daemon ? null : yield connectDB_1.connectDB();
         const browser = yield puppeteer_1.default.launch({ headless: true });
+        console.log("Browser has been launched");
         const league = yield leagues_1.Leagues.findOne({ where: sequelize_1.Sequelize.where(sequelize_1.Sequelize.fn('lower', sequelize_1.Sequelize.col('name')), sequelize_1.Sequelize.fn('lower', name)) });
         if (league) {
             yield crawler_1.crawler(browser, league);
         }
         yield browser.close();
-        yield sequelize.close();
+        if (sequelize) {
+            yield sequelize.close();
+        }
     });
 }
 exports.crawlLeague = crawlLeague;

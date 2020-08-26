@@ -6,7 +6,7 @@ export default function updateDateRoute(server: Application) {
     server.post("/api/updateDate/:sport/:league/", (req: Request, res: Response) => {
 
         const {sport, league} = req.params;
-        const {id, date} = req.body;
+        const {id, start_date} = req.body;
 
         if(!sport) {
             res.status(400).send(createMessage("Sport should be provided"));
@@ -23,12 +23,12 @@ export default function updateDateRoute(server: Application) {
             return;
         }
 
-        if(!date) {
+        if(!start_date) {
             res.status(400).send(createMessage("Abbreviation of team should be provided"));
             return;
         }
-        Matches.update({start_date: date}, {where: {id}})
-            .then(result => res.send(createMessage("Date is successfully updated", {id, date})))
+        Matches.update({start_date}, {where: {id}})
+            .then(result => res.send(createMessage("Date is successfully updated", {id, start_date})))
             .catch(err => res.status(400).send(createMessage(err)));
     })
 }

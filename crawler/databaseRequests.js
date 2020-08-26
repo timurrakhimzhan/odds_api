@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.databaseRequests = void 0;
 const matches_1 = require("../database/models/matches");
 const teams_1 = require("../database/models/teams");
 const statuses_1 = require("../database/models/statuses");
@@ -48,11 +49,11 @@ function databaseRequests(matchCrawled, league, season) {
                 sports_id: league.get("sports_id"),
                 status_id: status.get("id"),
                 seasons_id: season.get("id"),
-                home_score: scoreCrawled_1,
-                home_coeff: [coeffCrawled_1],
+                home_score: scoreCrawled_1 > 0 ? scoreCrawled_1 : null,
+                home_coeff: coeffCrawled_1 > 0 ? [coeffCrawled_1] : null,
                 away_id: away.get("id"),
-                away_score: scoreCrawled_2,
-                away_coeff: [coeffCrawled_2],
+                away_score: scoreCrawled_2 > 0 ? scoreCrawled_2 : null,
+                away_coeff: coeffCrawled_2 > 0 ? [coeffCrawled_2] : null,
                 start_date: dateCrawled.toDate(),
                 url: urlCrawled,
                 status: statusCrawled

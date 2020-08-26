@@ -12,28 +12,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const select_1 = require("../../database/preparedQueries/select");
-const store_1 = __importDefault(require("../../state/store"));
-const crawler_1 = require("../../state/actions/crawler");
-function process() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const client = {};
-        const { rows } = (yield client.query(select_1.selectAllleaguesPQ()));
-        for (let row of rows) {
-            console.log(`Started League: ${row.name}`);
-            // await crawlLeague(row.name, client);
-            console.log(`Finished League: ${row.name}`);
-        }
-    });
-}
-function daemon() {
+exports.fetcher = void 0;
+const store_1 = __importDefault(require("../state/store"));
+const crawler_1 = require("../state/actions/crawler");
+const connectDB_1 = require("../database/connectDB");
+const leagues_1 = require("../database/models/leagues");
+const crawler_2 = require("../crawler");
+function fetcher() {
     return __awaiter(this, void 0, void 0, function* () {
         store_1.default.dispatch(crawler_1.setDaemon(true));
-        yield process();
-        console.log("Crawled. Waiting for an hour...");
-        setTimeout(daemon, 1000 * 60 * 60);
+        const sequelize = yield connectDB_1.connectDB();
+        const rows = yield leagues_1.Leagues.findAll();
+        for (let row of rows) {
+            const name = row.get("name");
+            console.log(`Started League: ${name}`);
+            yield crawler_2.crawlLeague(name);
+            console.log(`Finished League: ${name}`);
+        }
+        yield sequelize.close();
     });
 }
-if ((require === null || require === void 0 ? void 0 : require.main) === module) {
-    daemon();
+exports.fetcher = fetcher;
+if (require.main === module) {
+    fetcher();
 }

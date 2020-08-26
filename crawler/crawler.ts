@@ -12,13 +12,32 @@ export async function crawler(browser: Browser, league: Leagues): Promise<void> 
     const page: Page = await browser.newPage();
     const url: string = league.get("url") as string;
     const {crawler} = store.getState();
-    const crawlerUrl = crawler.daemon ? url : url + "/results/";
+    const crawlerUrl = crawler.daemon ? url : url + "results/";
+    console.log("Page opening with url:", crawlerUrl);
     await page.goto(crawlerUrl);
+    console.log("Page opened with url:", crawlerUrl);
 
     await changeTimezone(page);
     console.log("----------------------------------");
     console.log("Timezone changed");
     console.log("----------------------------------");
+
+    if(crawler.daemon) {
+        const season: Seasons | null = await Seasons.findOne({
+            where: {
+                sports_id: league.get("sports_id") as number,
+                leagues_id: league.get("id") as number,
+                current: true
+            }
+        });
+        if(season) {
+            await crawlSeason(page, league, season);
+        } else {
+            console.log("No current season for this league");
+        }
+        await page.close();
+        return;
+    }
 
     let seasons: Array<ElementHandle<Element>> = await page.$$('.main-menu-gray .main-filter a');
     let seasonsNumber: number = seasons.length;

@@ -9,17 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CustomModel = void 0;
-const sequelize_1 = require("sequelize");
-class CustomModel extends sequelize_1.Model {
-    static getId(attributes) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const res = yield this.findOne({ where: attributes });
-            if (!res) {
-                throw new Error(`Can not find id of the record in the table ${this.tableName}`);
-            }
-            return res.get("id");
-        });
-    }
+const fetcher_1 = require("./fetcher");
+function daemon() {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield fetcher_1.fetcher();
+        console.log("Crawled. Waiting for an hour...");
+        setTimeout(daemon, 1000 * 60 * 60);
+    });
 }
-exports.CustomModel = CustomModel;
+if ((require === null || require === void 0 ? void 0 : require.main) === module) {
+    daemon();
+}

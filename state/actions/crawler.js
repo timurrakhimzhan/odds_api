@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.setDaemon = exports.setFunctionMatchCreated = exports.setFinishedCrawling = void 0;
 const actionTypes_1 = require("./actionTypes");
 function setFinishedCrawling(value) {
     return {

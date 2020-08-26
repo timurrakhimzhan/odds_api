@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const createMessage_1 = require("../../services/createMessage");
-const update_1 = require("../../database/preparedQueries/update");
-function updateDateRoute(server, client) {
+const matches_1 = require("../../database/models/matches");
+function updateDateRoute(server) {
     server.post("/api/updateDate/:sport/:league/", (req, res) => {
         const { sport, league } = req.params;
-        const { id, date } = req.body;
+        const { id, start_date } = req.body;
         if (!sport) {
             res.status(400).send(createMessage_1.createMessage("Sport should be provided"));
             return;
@@ -18,12 +18,12 @@ function updateDateRoute(server, client) {
             res.status(400).send(createMessage_1.createMessage("ID of team should be provided"));
             return;
         }
-        if (!date) {
+        if (!start_date) {
             res.status(400).send(createMessage_1.createMessage("Abbreviation of team should be provided"));
             return;
         }
-        client.query(update_1.updateMatchDatePQ(parseInt(id), date))
-            .then(result => res.send(createMessage_1.createMessage("Date is successfully updated", { id, date })))
+        matches_1.Matches.update({ start_date }, { where: { id } })
+            .then(result => res.send(createMessage_1.createMessage("Date is successfully updated", { id, start_date })))
             .catch(err => res.status(400).send(createMessage_1.createMessage(err)));
     });
 }

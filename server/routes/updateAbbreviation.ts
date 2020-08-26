@@ -1,6 +1,6 @@
 import {Application, Request, Response} from "express";
 import {createMessage} from "../../services/createMessage";
-import {Matches} from "../../database/models/matches";
+import {Teams} from "../../database/models/teams";
 
 export default function updateAbbrevRoute(server: Application) {
     server.post("/api/updateAbbrev/:sport/:league/", (req: Request, res: Response) => {
@@ -24,11 +24,11 @@ export default function updateAbbrevRoute(server: Application) {
         }
 
         if(!abbreviation) {
-            res.status(400).send(createMessage("Abbreviation of team should be provided"));
+            res.status(400).send(createMessage("Abbreviation of a team should be provided"));
             return;
         }
 
-        Matches.update({abbreviation}, {where: {id}})
+        Teams.update({abbreviation},{where: {id}})
             .then(() => res.send(createMessage("Abbreviation successfully updated", {abbreviation, id})))
             .catch(err => res.status(400).send(createMessage(err)));
     })
